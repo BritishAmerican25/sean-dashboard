@@ -99,6 +99,44 @@
   .ttoggle:hover{color:var(--text); border-color:var(--line-strong)}
   .ttoggle:focus-visible, .navlinks a:focus-visible{outline:2px solid var(--accent-line); outline-offset:2px}
 
+  /* ---------- marketing hero + waitlist ---------- */
+  .wl-nav{font-family:var(--mono); font-size:12px; text-decoration:none; color:#1c1503 !important;
+    background:var(--accent-line); border-radius:8px; padding:6px 12px; font-weight:600; white-space:nowrap}
+  .wl-nav:hover{filter:brightness(1.06)}
+  .heromkt{position:relative; overflow:hidden; border-bottom:1px solid var(--line);
+    background:radial-gradient(120% 110% at 84% -25%, var(--accent-soft) 0%, transparent 46%),
+               linear-gradient(180deg, var(--panel), var(--surface))}
+  .heromkt .grid{position:absolute; inset:0; opacity:.45; pointer-events:none;
+    background-image:linear-gradient(var(--line) 1px,transparent 1px),linear-gradient(90deg,var(--line) 1px,transparent 1px);
+    background-size:44px 44px; -webkit-mask-image:linear-gradient(180deg,rgba(0,0,0,.3),transparent 60%); mask-image:linear-gradient(180deg,rgba(0,0,0,.3),transparent 60%)}
+  .heromkt .inner{position:relative; padding:58px 0 48px}
+  .hm-h1{font-family:var(--disp); font-weight:800; letter-spacing:-.035em; line-height:1.0;
+    font-size:clamp(34px,6vw,60px); margin:16px 0 0; max-width:17ch; text-wrap:balance}
+  .hm-sub{margin-top:18px; max-width:58ch; font-size:clamp(16px,1.9vw,19px); color:var(--text-dim)}
+  .wl{margin-top:28px; display:flex; gap:10px; flex-wrap:wrap; max-width:540px}
+  .wl input[type=email]{flex:1 1 240px; min-width:0; font-family:var(--sans); font-size:15px;
+    padding:13px 16px; border-radius:12px; border:1px solid var(--line-strong); background:var(--panel); color:var(--text)}
+  .wl input[type=email]:focus-visible{outline:2px solid var(--accent-line); outline-offset:1px; border-color:var(--accent-line)}
+  .wl button{font-family:var(--disp); font-weight:700; font-size:15px; padding:13px 24px; border-radius:12px;
+    border:0; background:var(--accent-line); color:#1c1503; cursor:pointer; white-space:nowrap}
+  .wl button:hover{filter:brightness(1.06)} .wl button:disabled{opacity:.6; cursor:default}
+  .wl button:focus-visible{outline:2px solid var(--text); outline-offset:2px}
+  .wl-note{margin-top:11px; font-family:var(--mono); font-size:12px; color:var(--text-faint)}
+  .wl-msg{margin-top:11px; font-size:14px; min-height:1.2em}
+  .wl-msg.ok{color:var(--long)} .wl-msg.err{color:var(--short)} .wl-msg a{color:var(--accent)}
+  .hm-cue{margin-top:32px; font-family:var(--mono); font-size:12px; color:var(--text-faint); letter-spacing:.05em}
+  .hm-cue b{color:var(--text-dim); font-weight:500}
+  .proof-label{display:flex; align-items:center; gap:12px; margin:8px 0 -4px}
+  .proof-label .eyebrow{color:var(--long)}
+  .proof-label .rule{flex:1; height:1px; background:var(--line)}
+  /* bottom CTA band */
+  .ctaband{background:var(--ink); color:#e6ebf1; border-radius:20px; padding:40px; text-align:center; margin-bottom:8px}
+  .ctaband h2{color:#fff; font-family:var(--disp); font-weight:800; font-size:clamp(24px,3.4vw,32px); letter-spacing:-.02em; text-wrap:balance}
+  .ctaband p{margin:12px auto 0; color:#aeb9c6; max-width:52ch; font-size:15px}
+  .ctaband .wl{margin:22px auto 0; justify-content:center}
+  .ctaband input[type=email]{background:#0e131a; border-color:#2e3846; color:#e6ebf1}
+  .ctaband .wl-note{color:#7c8896}
+
   /* ---------- dashboard hero ---------- */
   .ops{padding:30px 0 8px; position:relative; overflow:hidden}
   .ops-grid{position:absolute; inset:0; opacity:.45; pointer-events:none;
@@ -414,15 +452,35 @@
       <a href="#lifecycle">Lifecycle</a>
       <a href="#structure">Market structure</a>
       <a href="#lab">Spread lab</a>
+      <a class="wl-nav" href="#waitlist">Join waitlist</a>
       <button class="ttoggle" id="themeBtn" aria-label="Toggle color theme"><span id="themeIcon">◐</span></button>
     </div>
   </div>
 </div>
 
+<!-- ============ MARKETING HERO ============ -->
+<section class="heromkt" id="waitlist">
+  <div class="grid" aria-hidden="true"></div>
+  <div class="wrap inner">
+    <span class="eyebrow">Now in paper testing · early access</span>
+    <h1 class="hm-h1">An autonomous options agent, trading in the open.</h1>
+    <p class="hm-sub">Sean scans ~900 stocks, scores each through 10 evidence layers and 23 pre-trade gates, and manages every position end to end — entries, profit-taking, exits — with no human hands. It's in paper testing now. Join the waitlist for early access when it opens up.</p>
+    <form class="wl" id="wlForm" novalidate>
+      <input type="email" name="email" placeholder="you@email.com" autocomplete="email" required aria-label="Your email">
+      <input type="hidden" name="_subject" value="New Sean waitlist signup">
+      <button type="submit" id="wlBtn">Join the waitlist</button>
+    </form>
+    <div class="wl-note">No spam — one email when access opens. Paper account · educational · not investment advice.</div>
+    <div class="wl-msg" id="wlMsg" role="status" aria-live="polite"></div>
+    <div class="hm-cue">↓ <b>See it work right now</b> — the board, gates and trades below are the live system, not a mockup.</div>
+  </div>
+</section>
+
 <!-- ============ LIVE OPERATIONS ============ -->
 <section class="ops" id="ops">
   <div class="ops-grid" aria-hidden="true"></div>
   <div class="wrap ops-inner">
+    <div class="proof-label"><span class="eyebrow">● Live proof</span><span class="rule"></span></div>
     <div class="ops-title">
       <h1>Operations</h1>
       <span class="freshness" id="freshness">—</span>
@@ -691,6 +749,17 @@
 
 <section class="edu">
   <div class="wrap">
+    <div class="ctaband">
+      <h2>Be first through the door.</h2>
+      <p>Sean is in paper testing today. Join the waitlist and you'll get one email the moment early access opens — nothing before.</p>
+      <form class="wl" id="wlForm2" novalidate>
+        <input type="email" name="email" placeholder="you@email.com" autocomplete="email" required aria-label="Your email">
+        <input type="hidden" name="_subject" value="New Sean waitlist signup">
+        <button type="submit">Join the waitlist</button>
+      </form>
+      <div class="wl-note">Paper account · educational · not investment advice.</div>
+      <div class="wl-msg" role="status" aria-live="polite"></div>
+    </div>
     <div class="closing">
       <span class="eyebrow">Why it's built this way</span>
       <h2>Trading is 20% strategy and 80% discipline — so the discipline is the code.</h2>
@@ -698,14 +767,14 @@
       <p class="quote">"You don't have to be right every time. You just have to lose small when wrong and win big when right." — that sentence, rendered in Python.</p>
     </div>
     <footer>
-      <div class="disc">Live operations view of the Sean autonomous options agent on an Alpaca <b>paper</b> account. Board, regime, positions and gate decisions are the system's real recorded state, stamped with the time of the last scan. When live data is older than its freshness window, the pipeline strip plays a clearly-labeled simulated trade so the process stays visible. The spread lab uses illustrative strikes to teach structure — examples, not live quotes or trade recommendations. Options carry substantial risk of loss.</div>
+      <div class="disc">Live operations view of the Sean autonomous options agent on an Alpaca <b>paper</b> account. Board, regime, positions and gate decisions are the system's real recorded state, stamped with the time of the last scan. When live data is older than its freshness window, the pipeline strip plays a clearly-labeled simulated trade so the process stays visible. The spread lab uses illustrative strikes to teach structure — examples, not live quotes or trade recommendations. Options carry substantial risk of loss. Joining the waitlist is a request for product updates — not a purchase, and not an offer or solicitation of securities. Hypothetical (paper) performance is not indicative of future results.</div>
     </footer>
   </div>
 </section>
 
 <script id="snapshot" type="application/json">
 {
-  "generated_at": "2026-09-05T16:48:08+00:00",
+  "generated_at": "2026-09-05T17:24:11+00:00",
   "stale_minutes": 45,
   "market_date": "2026-09-04",
   "account": {
@@ -1904,6 +1973,41 @@
     });
     var rt; window.addEventListener('resize',function(){ clearTimeout(rt); rt=setTimeout(update,120); });
     update();
+  })();
+
+  /* ---------- waitlist ---------- */
+  (function(){
+    // PASTE your form endpoint here to start collecting emails (2-min setup, no server):
+    //   Formspree → create a form at formspree.io, put its URL below, e.g.
+    //   var ENDPOINT = "https://formspree.io/f/xxxxxxxx";
+    var ENDPOINT = "";
+    var forms = document.querySelectorAll('form.wl');
+    Array.prototype.forEach.call(forms, function(form){
+      var btn = form.querySelector('button');
+      var msg = form.parentNode.querySelector('.wl-msg');
+      form.addEventListener('submit', function(e){
+        e.preventDefault();
+        var input = form.querySelector('input[type=email]');
+        var email = (input && input.value || '').trim();
+        if(!email){ return; }
+        if(msg){ msg.className='wl-msg'; msg.textContent=''; }
+        if(!ENDPOINT){
+          if(msg){ msg.className='wl-msg err'; msg.textContent='Waitlist isn’t connected yet — check back shortly.'; }
+          return;
+        }
+        var orig = btn ? btn.textContent : '';
+        if(btn){ btn.disabled=true; btn.textContent='Joining…'; }
+        fetch(ENDPOINT, {method:'POST', body:new FormData(form), headers:{'Accept':'application/json'}})
+          .then(function(r){
+            if(r.ok){ form.reset(); if(msg){ msg.className='wl-msg ok'; msg.textContent='You’re on the list — thanks. We’ll email you the moment access opens.'; } }
+            else { if(msg){ msg.className='wl-msg err'; msg.textContent='Something went wrong — please try again in a moment.'; } }
+          })
+          .catch(function(){
+            if(msg){ msg.className='wl-msg err'; msg.innerHTML='Can’t submit from this preview — join on <a href="https://britishamerican25.github.io/sean-dashboard/#waitlist">the live site</a>.'; }
+          })
+          .finally(function(){ if(btn){ btn.disabled=false; btn.textContent=orig; } });
+      });
+    });
   })();
 })();
 </script>
