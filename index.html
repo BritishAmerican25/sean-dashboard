@@ -1,0 +1,1446 @@
+<title>Sean Live Operations</title>
+<meta name="description" content="A live look at Sean's autonomous options agent — real regime, ranked board, positions and gate decisions — plus a walkthrough of how it finds, filters, executes and exits a trade.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap">
+<style>
+  :root{
+    --ink:#12161d; --panel:#ffffff; --surface:#f4f6f9; --surface-2:#eaeef3;
+    --line:#d6dde5; --line-strong:#b7c2cd;
+    --text:#1a2029; --text-dim:#586475; --text-faint:#8593a3;
+    --accent:#c17d18; --accent-soft:#f3e2c4; --accent-line:#e0a13c;
+    --long:#2f8556; --long-soft:#dcefe4;
+    --short:#c0453f; --short-soft:#f7dedc;
+    --rail:#c3ccd6;
+    --shadow:0 1px 2px rgba(18,22,29,.06), 0 8px 24px rgba(18,22,29,.06);
+    --shadow-lift:0 2px 6px rgba(18,22,29,.10), 0 18px 44px rgba(18,22,29,.12);
+    --mono:'IBM Plex Mono',ui-monospace,Menlo,Consolas,monospace;
+    --sans:'IBM Plex Sans',system-ui,-apple-system,sans-serif;
+    --disp:'Archivo','IBM Plex Sans',system-ui,sans-serif;
+    --maxw:1180px;
+  }
+  @media (prefers-color-scheme:dark){
+    :root:not([data-theme="light"]){
+      --ink:#0c0f14; --panel:#161b23; --surface:#0f141b; --surface-2:#1c232e;
+      --line:#28313d; --line-strong:#3a4655;
+      --text:#e6ebf1; --text-dim:#9aa7b6; --text-faint:#6c7a8b;
+      --accent:#e0a13c; --accent-soft:#3a2d15; --accent-line:#e0a13c;
+      --long:#4fb37f; --long-soft:#16301f;
+      --short:#e0655f; --short-soft:#33191a;
+      --rail:#2e3846;
+      --shadow:0 1px 2px rgba(0,0,0,.4), 0 10px 30px rgba(0,0,0,.35);
+      --shadow-lift:0 2px 8px rgba(0,0,0,.5), 0 22px 50px rgba(0,0,0,.5);
+    }
+  }
+  :root[data-theme="dark"]{
+    --ink:#0c0f14; --panel:#161b23; --surface:#0f141b; --surface-2:#1c232e;
+    --line:#28313d; --line-strong:#3a4655;
+    --text:#e6ebf1; --text-dim:#9aa7b6; --text-faint:#6c7a8b;
+    --accent:#e0a13c; --accent-soft:#3a2d15; --accent-line:#e0a13c;
+    --long:#4fb37f; --long-soft:#16301f;
+    --short:#e0655f; --short-soft:#33191a;
+    --rail:#2e3846;
+    --shadow:0 1px 2px rgba(0,0,0,.4), 0 10px 30px rgba(0,0,0,.35);
+    --shadow-lift:0 2px 8px rgba(0,0,0,.5), 0 22px 50px rgba(0,0,0,.5);
+  }
+
+  *{box-sizing:border-box}
+  html{-webkit-text-size-adjust:100%; scroll-behavior:smooth}
+  @media (prefers-reduced-motion:reduce){ html{scroll-behavior:auto} }
+  body{
+    margin:0; background:var(--surface); color:var(--text);
+    font-family:var(--sans); font-size:16px; line-height:1.6;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:var(--maxw); margin:0 auto; padding:0 24px}
+  h1,h2,h3,h4{font-family:var(--disp); text-wrap:balance; margin:0; letter-spacing:-.01em}
+  p{margin:0}
+  a{color:var(--accent)}
+  .mono{font-family:var(--mono)}
+  .num{font-variant-numeric:tabular-nums; font-family:var(--mono)}
+  .eyebrow{font-family:var(--mono); font-size:12px; font-weight:500; letter-spacing:.16em; text-transform:uppercase; color:var(--accent)}
+
+  /* ---------- top nav / status ribbon ---------- */
+  .ribbon{
+    position:sticky; top:0; z-index:40; background:var(--panel);
+    border-bottom:1px solid var(--line); box-shadow:var(--shadow);
+  }
+  .ribbon-in{max-width:var(--maxw); margin:0 auto; padding:10px 24px; display:flex; align-items:center; gap:16px; flex-wrap:wrap}
+  .brand{display:flex; align-items:center; gap:10px; font-family:var(--disp); font-weight:800; font-size:16px; letter-spacing:-.02em}
+  .brand .sean{color:var(--text)}
+  .pulse{width:9px; height:9px; border-radius:50%; background:var(--long); box-shadow:0 0 0 0 var(--long); position:relative}
+  .mode-live .pulse{animation:pulse 2s infinite}
+  @media (prefers-reduced-motion:reduce){ .mode-live .pulse{animation:none} }
+  @keyframes pulse{0%{box-shadow:0 0 0 0 rgba(63,160,106,.5)}70%{box-shadow:0 0 0 8px rgba(63,160,106,0)}100%{box-shadow:0 0 0 0 rgba(63,160,106,0)}}
+  .mode-demo .pulse{background:var(--accent-line)}
+  .statebadge{
+    font-family:var(--mono); font-size:11px; font-weight:600; letter-spacing:.1em; text-transform:uppercase;
+    padding:4px 10px; border-radius:999px; border:1px solid var(--line-strong);
+  }
+  .mode-live .statebadge{color:var(--long); background:var(--long-soft); border-color:var(--long)}
+  .mode-demo .statebadge{color:var(--accent); background:var(--accent-soft); border-color:var(--accent-line)}
+  .ribbon .navlinks{margin-left:auto; display:flex; gap:4px; flex-wrap:wrap}
+  .ribbon .navlinks a{
+    font-family:var(--mono); font-size:12px; color:var(--text-dim); text-decoration:none;
+    padding:6px 10px; border-radius:8px;
+  }
+  .ribbon .navlinks a:hover{color:var(--text); background:var(--surface-2)}
+  .modetoggle{display:inline-flex; border:1px solid var(--line); border-radius:8px; overflow:hidden}
+  .modetoggle button{
+    font-family:var(--mono); font-size:11px; letter-spacing:.05em; text-transform:uppercase;
+    background:var(--panel); color:var(--text-dim); border:0; padding:6px 11px; cursor:pointer;
+  }
+  .modetoggle button[aria-pressed="true"]{background:var(--accent-soft); color:var(--accent)}
+  .modetoggle button:focus-visible{outline:2px solid var(--accent-line); outline-offset:-2px}
+  .ttoggle{
+    background:var(--panel); border:1px solid var(--line); color:var(--text-dim);
+    border-radius:8px; padding:6px 10px; cursor:pointer; font-family:var(--mono); font-size:12px;
+  }
+  .ttoggle:hover{color:var(--text); border-color:var(--line-strong)}
+  .ttoggle:focus-visible, .navlinks a:focus-visible{outline:2px solid var(--accent-line); outline-offset:2px}
+
+  /* ---------- dashboard hero ---------- */
+  .ops{padding:30px 0 8px; position:relative; overflow:hidden}
+  .ops-grid{position:absolute; inset:0; opacity:.45; pointer-events:none;
+    background-image:linear-gradient(var(--line) 1px, transparent 1px), linear-gradient(90deg, var(--line) 1px, transparent 1px);
+    background-size:44px 44px; -webkit-mask-image:linear-gradient(180deg, rgba(0,0,0,.3), transparent 55%); mask-image:linear-gradient(180deg, rgba(0,0,0,.3), transparent 55%)}
+  .ops-inner{position:relative}
+  .ops-title{display:flex; align-items:baseline; gap:14px; flex-wrap:wrap}
+  .ops-title h1{font-family:var(--disp); font-weight:800; font-size:clamp(26px,4vw,40px); letter-spacing:-.03em}
+  .ops-title .freshness{font-family:var(--mono); font-size:12.5px; color:var(--text-dim)}
+  .ops-title .freshness b{color:var(--text)}
+  .ops-sub{margin-top:8px; color:var(--text-dim); max-width:70ch; font-size:15.5px}
+
+  /* pipeline status strip */
+  .pipe{
+    margin-top:22px; background:var(--panel); border:1px solid var(--line); border-radius:16px;
+    box-shadow:var(--shadow); overflow:hidden;
+  }
+  .pipe-cap{
+    display:flex; align-items:center; gap:12px; padding:13px 20px; border-bottom:1px solid var(--line);
+    font-family:var(--mono); font-size:13px; color:var(--text-dim); flex-wrap:wrap;
+  }
+  .pipe-cap .simtag{font-size:10.5px; letter-spacing:.1em; text-transform:uppercase; color:var(--accent);
+    border:1px solid var(--accent-line); border-radius:6px; padding:2px 7px}
+  .pipe-cap .status{color:var(--text); font-weight:500}
+  .pipe-cap .pnl{margin-left:auto; font-family:var(--disp); font-weight:800; font-size:20px; font-variant-numeric:tabular-nums}
+  .pipe-cap .pnl.up{color:var(--long)} .pipe-cap .pnl.down{color:var(--short)} .pipe-cap .pnl.flat{color:var(--text-dim)}
+  .stations{display:grid; grid-template-columns:repeat(5,1fr); gap:1px; background:var(--line)}
+  @media (max-width:680px){ .stations{grid-template-columns:repeat(5,1fr)} }
+  .st{background:var(--panel); padding:16px 12px 15px; text-align:center; position:relative; transition:background .3s ease}
+  .st .stn{font-family:var(--mono); font-size:10.5px; color:var(--text-faint); letter-spacing:.06em}
+  .st .stt{font-family:var(--disp); font-weight:700; font-size:14.5px; margin-top:5px}
+  .st .stbar{height:3px; border-radius:2px; margin-top:11px; background:var(--surface-2)}
+  .st.done .stbar{background:var(--long)}
+  .st.active{background:var(--accent-soft)}
+  .st.active .stt{color:var(--accent)}
+  .st.active .stbar{background:var(--accent-line); animation:fill 1.1s ease-in-out infinite alternate}
+  @media (prefers-reduced-motion:reduce){ .st.active .stbar{animation:none} }
+  @keyframes fill{from{opacity:.35}to{opacity:1}}
+  .st.done .stt{color:var(--text)}
+  .st .stcheck{position:absolute; top:9px; right:10px; font-family:var(--mono); font-size:11px; color:var(--long); opacity:0}
+  .st.done .stcheck{opacity:1}
+  @media (max-width:680px){ .st .stt{font-size:11px} .st{padding:12px 4px} }
+
+  /* dashboard grid */
+  .dash{display:grid; grid-template-columns:1.35fr 1fr; gap:20px; margin-top:22px}
+  @media (max-width:900px){ .dash{grid-template-columns:1fr} }
+  .col{display:flex; flex-direction:column; gap:20px}
+  .panel{background:var(--panel); border:1px solid var(--line); border-radius:16px; box-shadow:var(--shadow); overflow:hidden}
+  .panel-h{display:flex; align-items:center; justify-content:space-between; padding:14px 18px; border-bottom:1px solid var(--line)}
+  .panel-h h3{font-size:15px; font-weight:700}
+  .panel-h .meta{font-family:var(--mono); font-size:11.5px; color:var(--text-faint)}
+
+  /* tiles */
+  .tiles{display:grid; grid-template-columns:repeat(4,1fr); gap:1px; background:var(--line)}
+  @media (max-width:520px){ .tiles{grid-template-columns:repeat(2,1fr)} }
+  .tile{background:var(--panel); padding:14px 14px}
+  .tile .tl{font-family:var(--mono); font-size:10px; letter-spacing:.06em; text-transform:uppercase; color:var(--text-faint)}
+  .tile .tv{font-family:var(--disp); font-weight:800; font-size:19px; margin-top:5px; font-variant-numeric:tabular-nums}
+  .tile .tv small{font-size:12px; font-weight:500; color:var(--text-dim)}
+  .tv.up{color:var(--long)} .tv.down{color:var(--short)}
+
+  /* regime bar */
+  .regime{padding:16px 18px; display:flex; flex-direction:column; gap:12px}
+  .regime .rtop{display:flex; align-items:center; gap:10px; flex-wrap:wrap}
+  .regime .rname{font-family:var(--disp); font-weight:800; font-size:18px; letter-spacing:-.01em}
+  .regime .rchip{font-family:var(--mono); font-size:11px; padding:3px 9px; border-radius:999px; border:1px solid var(--line); color:var(--text-dim); background:var(--surface-2)}
+  .regime .rchip.bull{color:var(--long); border-color:var(--long); background:var(--long-soft)}
+  .regime .rdesc{font-size:13.5px; color:var(--text-dim)}
+  .regime .rmini{display:flex; gap:18px; flex-wrap:wrap; font-family:var(--mono); font-size:12.5px; color:var(--text-dim)}
+  .regime .rmini b{color:var(--text); font-weight:600}
+  .strats{display:flex; gap:6px; flex-wrap:wrap}
+  .strats span{font-family:var(--mono); font-size:11px; color:var(--text-dim); background:var(--surface-2); border:1px solid var(--line); border-radius:7px; padding:3px 8px}
+
+  /* board list */
+  .board{max-height:520px; overflow-y:auto}
+  .brow{display:grid; grid-template-columns:34px 1fr auto; align-items:center; gap:12px; padding:11px 18px; border-top:1px solid var(--line)}
+  .brow:first-child{border-top:0}
+  .brow.on{background:var(--accent-soft)}
+  .gbadge{font-family:var(--disp); font-weight:800; font-size:13px; width:34px; height:26px; display:flex; align-items:center; justify-content:center; border-radius:7px; border:1px solid var(--line)}
+  .gbadge.ap{background:var(--accent-soft); color:var(--accent); border-color:var(--accent-line)}
+  .gbadge.a{background:var(--surface-2); color:var(--text)}
+  .gbadge.b{background:var(--surface-2); color:var(--text-dim)}
+  .bmid{min-width:0}
+  .bsym{font-family:var(--disp); font-weight:700; font-size:15px; display:flex; align-items:center; gap:8px}
+  .arrow{font-family:var(--mono); font-size:12px; font-weight:600}
+  .arrow.bull{color:var(--long)} .arrow.bear{color:var(--short)}
+  .btags{margin-top:3px; display:flex; gap:8px; flex-wrap:wrap; font-family:var(--mono); font-size:11px; color:var(--text-faint)}
+  .btags .dp.accum{color:var(--long)} .btags .dp.distrib{color:var(--short)}
+  .btags .ftc{color:var(--accent)}
+  .bconv{text-align:right; font-family:var(--mono); font-size:12px; color:var(--text-dim)}
+  .bconv b{font-family:var(--disp); font-weight:800; font-size:17px; color:var(--text); display:block}
+  .pill{font-family:var(--mono); font-size:9.5px; letter-spacing:.05em; text-transform:uppercase; padding:1px 6px; border-radius:5px; border:1px solid var(--accent-line); color:var(--accent)}
+
+  /* positions / empty */
+  .empty{padding:22px 18px; color:var(--text-dim); font-size:14px}
+  .empty b{color:var(--text)}
+  .posrow{padding:14px 18px; border-top:1px solid var(--line)}
+  .posrow:first-child{border-top:0}
+
+  /* gate feed */
+  .feed{max-height:280px; overflow-y:auto}
+  .frow{display:grid; grid-template-columns:auto 1fr auto; align-items:center; gap:12px; padding:10px 18px; border-top:1px solid var(--line); font-size:13px}
+  .frow:first-child{border-top:0}
+  .fstat{font-family:var(--mono); font-size:11px; font-weight:600; padding:2px 8px; border-radius:6px}
+  .fstat.pass{color:var(--long); background:var(--long-soft)}
+  .fstat.block{color:var(--short); background:var(--short-soft)}
+  .fmid{min-width:0}
+  .fmid .fsym{font-family:var(--disp); font-weight:700; font-size:13.5px}
+  .fmid .freason{font-family:var(--mono); font-size:11px; color:var(--text-faint)}
+  .fright{font-family:var(--mono); font-size:11px; color:var(--text-faint); text-align:right}
+
+  /* recent closes */
+  .recent{display:flex; flex-direction:column}
+  .rrow{display:grid; grid-template-columns:1fr auto auto; gap:10px; align-items:center; padding:9px 18px; border-top:1px solid var(--line); font-size:13px}
+  .rrow:first-child{border-top:0}
+  .rrow .rsym{font-family:var(--disp); font-weight:700}
+  .rrow .rpnl{font-family:var(--mono); font-weight:600}
+  .rrow .rpnl.up{color:var(--long)} .rrow .rpnl.down{color:var(--short)}
+  .rrow .rst{font-family:var(--mono); font-size:11px; color:var(--text-faint)}
+
+  /* ---------- educational section shell (reused) ---------- */
+  .divider{height:1px; background:var(--line); max-width:var(--maxw); margin:44px auto 0}
+  section.edu{padding:60px 0}
+  .sec-head{max-width:66ch; margin-bottom:36px}
+  .sec-head h2{font-size:clamp(26px,3.6vw,38px); font-weight:700; margin-top:10px; line-height:1.05}
+  .sec-head p{margin-top:14px; color:var(--text-dim); font-size:17px}
+
+  .rail{position:relative; display:flex; flex-direction:column; gap:26px}
+  .rail::before{content:""; position:absolute; left:27px; top:26px; bottom:26px; width:2px;
+    background:linear-gradient(180deg, var(--accent-line), var(--rail) 12%, var(--rail) 88%, var(--long))}
+  @media (max-width:640px){ .rail::before{left:19px} }
+  .station{position:relative; padding-left:76px}
+  @media (max-width:640px){ .station{padding-left:56px} }
+  .marker{position:absolute; left:0; top:0; width:56px; height:56px; border-radius:14px;
+    background:var(--panel); border:1px solid var(--line-strong); display:flex; align-items:center; justify-content:center;
+    font-family:var(--disp); font-weight:800; font-size:20px; color:var(--accent); box-shadow:var(--shadow); z-index:1}
+  @media (max-width:640px){ .marker{width:40px; height:40px; font-size:15px; border-radius:11px} }
+  .card{background:var(--panel); border:1px solid var(--line); border-radius:16px; padding:26px 28px; box-shadow:var(--shadow)}
+  .station-kicker{display:flex; align-items:baseline; gap:12px; flex-wrap:wrap}
+  .station h3{font-size:22px; font-weight:700}
+  .station .role{font-family:var(--mono); font-size:12px; color:var(--text-faint); letter-spacing:.08em; text-transform:uppercase}
+  .station .desc{margin-top:12px; color:var(--text-dim); max-width:64ch}
+  .chips{display:flex; flex-wrap:wrap; gap:8px; margin-top:18px}
+  .chip{font-family:var(--mono); font-size:12px; color:var(--text-dim); background:var(--surface-2); border:1px solid var(--line); border-radius:8px; padding:5px 10px}
+  .chip b{color:var(--text); font-weight:600}
+  .subgrid{display:grid; grid-template-columns:repeat(auto-fit,minmax(170px,1fr)); gap:1px; margin-top:20px; background:var(--line); border:1px solid var(--line); border-radius:12px; overflow:hidden}
+  .subgrid .cell{background:var(--panel); padding:14px 16px}
+  .subgrid .cell .kk{font-family:var(--mono); font-size:11px; letter-spacing:.08em; text-transform:uppercase; color:var(--text-faint)}
+  .subgrid .cell .vv{margin-top:5px; font-size:14px; color:var(--text)}
+  .grade-strip{display:flex; gap:0; margin-top:20px; border-radius:10px; overflow:hidden; border:1px solid var(--line)}
+  .grade-strip .g{flex:1; padding:12px 8px; text-align:center; background:var(--panel); border-right:1px solid var(--line)}
+  .grade-strip .g:last-child{border-right:0}
+  .grade-strip .g .gl{font-family:var(--disp); font-weight:800; font-size:20px}
+  .grade-strip .g .gs{font-family:var(--mono); font-size:11px; color:var(--text-dim); margin-top:2px}
+  .grade-strip .g.aplus{background:var(--accent-soft)} .grade-strip .g.aplus .gl{color:var(--accent)}
+  .grade-strip .g.c .gl{color:var(--text-faint); text-decoration:line-through}
+  .ladder{margin-top:20px; display:flex; flex-direction:column; gap:8px}
+  .rung{display:grid; grid-template-columns:64px 1fr auto; align-items:center; gap:14px; background:var(--surface-2); border:1px solid var(--line); border-radius:10px; padding:11px 14px}
+  .rung .tg{font-family:var(--mono); font-weight:600; color:var(--long)}
+  .rung .rx{font-size:13.5px; color:var(--text-dim)}
+  .rung .rf{font-family:var(--mono); font-size:13px; color:var(--text)}
+  .rung.be{border-color:var(--accent-line); background:var(--accent-soft)}
+  .rung.be .rx{color:var(--text)}
+  .exit-list{margin-top:18px; display:grid; gap:10px}
+  .exit-item{display:grid; grid-template-columns:150px 1fr; gap:16px; align-items:start; padding:12px 0; border-top:1px dashed var(--line)}
+  .exit-item:first-child{border-top:0}
+  .exit-item .en{font-family:var(--mono); font-size:13px; color:var(--short); font-weight:500}
+  .exit-item .en.good{color:var(--long)}
+  .exit-item .ed{font-size:14px; color:var(--text-dim)}
+  @media (max-width:520px){ .exit-item{grid-template-columns:1fr; gap:4px} }
+
+  .flow{display:flex; align-items:stretch; gap:0; flex-wrap:wrap; margin-top:8px}
+  .hop{flex:1; min-width:150px; background:var(--panel); border:1px solid var(--line); border-radius:12px; padding:16px; position:relative; box-shadow:var(--shadow)}
+  .hop + .hop{margin-left:26px}
+  .hop::after{content:"\2192"; position:absolute; right:-22px; top:50%; transform:translateY(-50%); font-family:var(--mono); color:var(--accent); font-size:20px; z-index:2}
+  .hop:last-child::after{content:""}
+  @media (max-width:760px){
+    .flow{flex-direction:column}
+    .hop + .hop{margin-left:0; margin-top:26px}
+    .hop::after{content:"\2193"; right:auto; left:50%; top:auto; bottom:-24px; transform:translateX(-50%)}
+    .hop:last-child::after{content:""}
+  }
+  .hop .hn{font-family:var(--mono); font-size:11px; color:var(--text-faint); letter-spacing:.1em}
+  .hop h4{font-size:16px; font-weight:700; margin-top:6px}
+  .hop p{margin-top:7px; font-size:13.5px; color:var(--text-dim)}
+  .cols{display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:20px; margin-top:8px}
+  .infocard{background:var(--panel); border:1px solid var(--line); border-radius:14px; padding:22px 24px; box-shadow:var(--shadow)}
+  .infocard h4{font-size:17px; font-weight:700; display:flex; align-items:center; gap:10px}
+  .infocard h4 .mk{font-family:var(--mono); font-size:12px; color:var(--accent); border:1px solid var(--accent-line); border-radius:6px; padding:1px 7px}
+  .infocard p{margin-top:10px; font-size:14.5px; color:var(--text-dim)}
+  .infocard ul{margin:12px 0 0; padding-left:18px; color:var(--text-dim); font-size:14.5px}
+  .infocard li{margin:6px 0} .infocard li b{color:var(--text); font-weight:600}
+  .spreadtax{margin-top:22px; background:var(--short-soft); border:1px solid var(--short); border-radius:14px; padding:20px 24px}
+  .spreadtax h4{color:var(--short); font-size:16px; display:flex; align-items:center; gap:9px}
+  .spreadtax p{margin-top:9px; font-size:14.5px; color:var(--text)}
+  .spreadtax .mono{color:var(--text)}
+
+  .lab{background:var(--panel); border:1px solid var(--line-strong); border-radius:18px; box-shadow:var(--shadow-lift); overflow:hidden}
+  .lab-head{padding:22px 26px; border-bottom:1px solid var(--line); display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px}
+  .lab-head h3{font-size:20px; font-weight:700}
+  .lab-head .badge{font-family:var(--mono); font-size:11px; letter-spacing:.08em; text-transform:uppercase; color:var(--text-dim); background:var(--surface-2); border:1px solid var(--line); border-radius:999px; padding:5px 12px}
+  .lab-body{display:grid; grid-template-columns:1fr 1.15fr; gap:0}
+  @media (max-width:860px){ .lab-body{grid-template-columns:1fr} }
+  .lab-controls{padding:24px 26px; border-right:1px solid var(--line)}
+  @media (max-width:860px){ .lab-controls{border-right:0; border-bottom:1px solid var(--line)} }
+  .legrow{display:flex; align-items:center; gap:10px; margin-bottom:14px}
+  .legtag{font-family:var(--mono); font-size:11px; font-weight:600; letter-spacing:.06em; padding:3px 9px; border-radius:6px}
+  .legtag.buy{color:var(--long); background:var(--long-soft)}
+  .legtag.sell{color:var(--short); background:var(--short-soft)}
+  .field{margin:16px 0}
+  .field label{display:flex; justify-content:space-between; align-items:baseline; font-size:13px; color:var(--text-dim); margin-bottom:7px}
+  .field label .val{font-family:var(--mono); font-weight:600; color:var(--text); font-size:15px}
+  input[type=range]{width:100%; accent-color:var(--accent); height:4px}
+  input[type=number]{width:100%; font-family:var(--mono); font-size:15px; color:var(--text); background:var(--surface-2); border:1px solid var(--line); border-radius:8px; padding:9px 11px}
+  input:focus-visible{outline:2px solid var(--accent-line); outline-offset:1px}
+  .setup-line{font-family:var(--mono); font-size:13px; color:var(--text-dim); margin-top:4px; line-height:1.5}
+  .setup-line b{color:var(--text)}
+  .presets{display:flex; gap:8px; margin-top:18px; flex-wrap:wrap}
+  .presets button{font-family:var(--mono); font-size:12px; color:var(--text-dim); cursor:pointer; background:var(--surface-2); border:1px solid var(--line); border-radius:8px; padding:7px 12px}
+  .presets button:hover{color:var(--text); border-color:var(--line-strong)}
+  .lab-viz{padding:20px 22px; display:flex; flex-direction:column}
+  .chartwrap{position:relative; width:100%}
+  canvas{display:block; width:100%; height:auto}
+  .metrics{display:grid; grid-template-columns:repeat(4,1fr); gap:1px; margin-top:16px; background:var(--line); border:1px solid var(--line); border-radius:12px; overflow:hidden}
+  @media (max-width:520px){ .metrics{grid-template-columns:repeat(2,1fr)} }
+  .metric{background:var(--panel); padding:13px 12px; text-align:center}
+  .metric .ml{font-family:var(--mono); font-size:10.5px; letter-spacing:.07em; text-transform:uppercase; color:var(--text-faint)}
+  .metric .mv{font-family:var(--disp); font-weight:800; font-size:20px; margin-top:4px; font-variant-numeric:tabular-nums}
+  .metric.profit .mv{color:var(--long)} .metric.loss .mv{color:var(--short)}
+  .verdict{margin-top:14px; font-size:13.5px; color:var(--text-dim); line-height:1.55}
+  .verdict b{color:var(--text)}
+
+  .closing{background:var(--ink); color:#e6ebf1; border-radius:20px; padding:44px 40px; position:relative; overflow:hidden}
+  .closing .eyebrow{color:var(--accent-line)}
+  .closing h2{color:#fff; font-size:clamp(24px,3.4vw,34px); margin-top:10px; max-width:24ch}
+  .closing p{margin-top:16px; color:#aeb9c6; max-width:64ch}
+  .closing .quote{margin-top:22px; font-family:var(--disp); font-weight:600; font-size:19px; color:#fff; border-left:3px solid var(--accent-line); padding-left:18px; max-width:58ch}
+  footer{padding:34px 0 60px; color:var(--text-faint); font-size:13px; font-family:var(--mono)}
+  footer .disc{max-width:74ch; line-height:1.6}
+
+  @media (prefers-reduced-motion:no-preference){
+    .infocard,.hop{transition:transform .18s ease, box-shadow .18s ease}
+    .station:hover .card{box-shadow:var(--shadow-lift)}
+    .infocard:hover{transform:translateY(-2px); box-shadow:var(--shadow-lift)}
+    .brow{transition:background .3s ease}
+  }
+</style>
+
+<!-- ============ RIBBON ============ -->
+<div class="ribbon mode-demo" id="ribbon">
+  <div class="ribbon-in">
+    <div class="brand"><span class="pulse"></span><span class="sean">SEAN</span></div>
+    <span class="statebadge" id="stateBadge">DEMO</span>
+    <div class="modetoggle" role="group" aria-label="Live or demo view">
+      <button id="mAuto" aria-pressed="true">Auto</button>
+      <button id="mDemo" aria-pressed="false">Watch demo</button>
+    </div>
+    <div class="navlinks">
+      <a href="#ops">Live</a>
+      <a href="#lifecycle">Lifecycle</a>
+      <a href="#structure">Market structure</a>
+      <a href="#lab">Spread lab</a>
+      <button class="ttoggle" id="themeBtn" aria-label="Toggle color theme"><span id="themeIcon">◐</span></button>
+    </div>
+  </div>
+</div>
+
+<!-- ============ LIVE OPERATIONS ============ -->
+<section class="ops" id="ops">
+  <div class="ops-grid" aria-hidden="true"></div>
+  <div class="wrap ops-inner">
+    <div class="ops-title">
+      <h1>Operations</h1>
+      <span class="freshness" id="freshness">—</span>
+    </div>
+    <p class="ops-sub">A live window into the machine: the market regime it's trading, the ranked board it built this morning, the positions it's managing, and the gate decisions behind every skipped or taken trade. Paper account — real analysis.</p>
+
+    <!-- pipeline -->
+    <div class="pipe">
+      <div class="pipe-cap">
+        <span class="simtag" id="pipeTag" hidden>Simulated trade</span>
+        <span class="status" id="pipeStatus">Initializing…</span>
+        <span class="pnl flat" id="pipePnl"></span>
+      </div>
+      <div class="stations" id="stations">
+        <div class="st" data-k="find"><span class="stcheck">✓</span><div class="stn">01</div><div class="stt">Find</div><div class="stbar"></div></div>
+        <div class="st" data-k="filter"><span class="stcheck">✓</span><div class="stn">02</div><div class="stt">Filter</div><div class="stbar"></div></div>
+        <div class="st" data-k="execute"><span class="stcheck">✓</span><div class="stn">03</div><div class="stt">Execute</div><div class="stbar"></div></div>
+        <div class="st" data-k="profit"><span class="stcheck">✓</span><div class="stn">04</div><div class="stt">Take profit</div><div class="stbar"></div></div>
+        <div class="st" data-k="exit"><span class="stcheck">✓</span><div class="stn">05</div><div class="stt">Exit</div><div class="stbar"></div></div>
+      </div>
+    </div>
+
+    <!-- dashboard grid -->
+    <div class="dash">
+      <div class="col">
+        <div class="panel">
+          <div class="panel-h"><h3>Today's board — ranked candidates</h3><span class="meta" id="boardMeta">—</span></div>
+          <div class="board" id="board"></div>
+        </div>
+      </div>
+      <div class="col">
+        <div class="panel">
+          <div class="panel-h"><h3>Market regime</h3><span class="meta" id="regimeMeta">—</span></div>
+          <div class="regime" id="regime"></div>
+        </div>
+        <div class="panel">
+          <div class="panel-h"><h3>Account</h3><span class="meta">Alpaca paper</span></div>
+          <div class="tiles" id="tiles"></div>
+        </div>
+        <div class="panel">
+          <div class="panel-h"><h3>Positions</h3><span class="meta" id="posMeta">—</span></div>
+          <div id="positions"></div>
+        </div>
+        <div class="panel">
+          <div class="panel-h"><h3>Gate decisions</h3><span class="meta">23-gate compliance</span></div>
+          <div class="feed" id="gates"></div>
+        </div>
+        <div class="panel">
+          <div class="panel-h"><h3>Recent closes</h3><span class="meta" id="recentMeta">paper P&amp;L</span></div>
+          <div class="recent" id="recent"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ============ EDUCATIONAL WALKTHROUGH ============ -->
+<section class="edu" id="lifecycle">
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="eyebrow">How it works · the five stations</span>
+      <h2>From a market of 900 names to a single managed position.</h2>
+      <p>The dashboard above is this pipeline, running. Each station hands the next a stricter, smaller set. Nothing skips a step — a 5-minute signal without daily context is a momentum trap, and a daily bias without intraday confirmation is theta bleed. The order carries the meaning.</p>
+    </div>
+    <div class="rail">
+      <div class="station"><div class="marker">01</div><div class="card">
+        <div class="station-kicker"><h3>Find</h3><span class="role">Scan · Score · Grade</span></div>
+        <p class="desc">At 07:15 ET Sean rebuilds its universe from every active U.S. equity, keeps the ~900 that clear a liquidity floor ($10M ADV, price ≥ $5), and scores each through a 10-layer evidence hierarchy. The score becomes a letter grade — the single most predictive filter Sean has.</p>
+        <div class="subgrid">
+          <div class="cell"><div class="kk">Direction</div><div class="vv">Daily / weekly / monthly bias (Full Timeframe Continuity)</div></div>
+          <div class="cell"><div class="kk">Structure</div><div class="vv">SMC order blocks, Break of Structure, the Strat bar types</div></div>
+          <div class="cell"><div class="kk">Flow</div><div class="vv">CMF + FINRA dark-pool block prints (accum vs distrib)</div></div>
+          <div class="cell"><div class="kk">Confirmation</div><div class="vv">Candle patterns, RVOL, news, gap archetype</div></div>
+        </div>
+        <div class="grade-strip">
+          <div class="g aplus"><div class="gl">A+</div><div class="gs">conv 13+ · pincer 3%</div></div>
+          <div class="g"><div class="gl">A</div><div class="gs">conv 10–12 · 1.5%</div></div>
+          <div class="g"><div class="gl">B</div><div class="gs">conv 8–9 · 0.75×</div></div>
+          <div class="g c"><div class="gl">C</div><div class="gs">no evidence · skip</div></div>
+        </div>
+      </div></div>
+
+      <div class="station"><div class="marker">02</div><div class="card">
+        <div class="station-kicker"><h3>Filter</h3><span class="role">23-gate compliance · fail-closed</span></div>
+        <p class="desc">A high grade is necessary, not sufficient. Before any order, the candidate passes a 23-gate checklist logged to an audit trail — the same feed you see live in the dashboard. The gates encode the psychology mechanically: no impulse re-entry, no chasing, no fighting the tape.</p>
+        <div class="chips">
+          <span class="chip"><b>Regime</b> allows the strategy</span>
+          <span class="chip"><b>10:45 ET</b> gate + 30-min cooldown</span>
+          <span class="chip"><b>Dark-pool flow</b> not opposing</span>
+          <span class="chip"><b>LuxAlgo EXH</b> — hard block</span>
+          <span class="chip"><b>NYSE breadth</b> ADD ±100</span>
+          <span class="chip">Earnings blackout · 7 days</span>
+          <span class="chip">Cost cap · 15% of equity</span>
+          <span class="chip"><b>D5</b> intraday trigger · 3-of-4</span>
+          <span class="chip">Max 3/day · max 2 same-side</span>
+        </div>
+        <p class="desc" style="margin-top:16px">The rule Sean leans on hardest: <b>trade with the flow, never against it.</b> A bullish setup with institutions quietly distributing into it is hard-blocked — the flow veto has caught more traps than any other single gate.</p>
+      </div></div>
+
+      <div class="station"><div class="marker">03</div><div class="card">
+        <div class="station-kicker"><h3>Execute</h3><span class="role">Contract select · route · confirm fill</span></div>
+        <p class="desc">With a setup that passed, Sean picks the contract, not just the direction: a slightly in-the-money strike (delta 0.55–0.70), 21–45 days to expiry, a premium above $2.00 so a −25% stop isn't just noise, and a spread tight enough to not tax the trade. Then a <b>DAY limit order</b> — never a market order — and a 45-second wait to verify the fill before recording the position.</p>
+        <div class="subgrid">
+          <div class="cell"><div class="kk">Delta</div><div class="vv">0.55 – 0.70 (slightly ITM)</div></div>
+          <div class="cell"><div class="kk">DTE</div><div class="vv">21 – 45 days</div></div>
+          <div class="cell"><div class="kk">Min premium</div><div class="vv">$2.00 (stop needs room)</div></div>
+          <div class="cell"><div class="kk">Order type</div><div class="vv">DAY limit · fill confirmed at 45s</div></div>
+        </div>
+      </div></div>
+
+      <div class="station"><div class="marker">04</div><div class="card">
+        <div class="station-kicker"><h3>Take profit</h3><span class="role">Tiered ladder · scale out</span></div>
+        <p class="desc">Sean doesn't hold for one all-or-nothing target — a single-target system scratched 73% of the time in backtest. It sells in quarters as the premium climbs, and moves the runner's stop to breakeven at +50%, converting the position into a free trade.</p>
+        <div class="ladder">
+          <div class="rung"><span class="tg num">+25%</span><span class="rx">Sell 25% of contracts</span><span class="rf">runner → 75%</span></div>
+          <div class="rung be"><span class="tg num">+50%</span><span class="rx">Sell 25% · <b>move stop to breakeven</b></span><span class="rf">runner → 50%</span></div>
+          <div class="rung"><span class="tg num">+75%</span><span class="rx">Sell 25% of contracts</span><span class="rf">runner → 25%</span></div>
+          <div class="rung"><span class="tg num">+100%</span><span class="rx">Close the final quarter</span><span class="rf">flat</span></div>
+        </div>
+      </div></div>
+
+      <div class="station"><div class="marker">05</div><div class="card">
+        <div class="station-kicker"><h3>Exit</h3><span class="role">Where the idea is wrong</span></div>
+        <p class="desc">Every position has more than one door out. The premium stop is the catastrophic backstop; the real swing stop is structural — the underlying closing beyond the order block means the thesis failed. Fallbacks handle the moves that stall. All of them fail open: missing data never forces an exit.</p>
+        <div class="exit-list">
+          <div class="exit-item"><span class="en">Structural</span><span class="ed">Underlying closes beyond the OB level — the setup is invalidated. Close 100%.</span></div>
+          <div class="exit-item"><span class="en">Premium stop</span><span class="ed">Day −15% / swing −45% hard floor, ATR-widened so ordinary chop can't clip it.</span></div>
+          <div class="exit-item"><span class="en">CMF divergence</span><span class="ed">Institutions distributing into a gain ≥ +10% → bank it before the reversal.</span></div>
+          <div class="exit-item"><span class="en">Time stop</span><span class="ed">Stalled 4+ bars at +15–40%, or unprofitable after 5 trading days → out.</span></div>
+          <div class="exit-item"><span class="en good">Roll</span><span class="ed">Profitable with ≤ 7 DTE → close and re-open 21–45 DTE. Losers are never rolled.</span></div>
+        </div>
+      </div></div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<section class="edu" id="structure">
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="eyebrow">Under the fill · market structure</span>
+      <h2>What happens to an order after you hit send.</h2>
+      <p>Sean's limit order doesn't go "to the market" — it travels a specific path through a specific structure. Knowing that structure is what turns order type, spread, and liquidity from trivia into edge.</p>
+    </div>
+    <div class="flow">
+      <div class="hop"><div class="hn">01</div><h4>Broker</h4><p>The DAY limit lands at the broker (Alpaca), validated against buying power and routed — it never touches an exchange floor directly.</p></div>
+      <div class="hop"><div class="hn">02</div><h4>Routing</h4><p>The broker sends it to a venue: one of ~18 options exchanges or a wholesaler that may offer price improvement inside the quote.</p></div>
+      <div class="hop"><div class="hn">03</div><h4>NBBO match</h4><p>It must fill at or inside the National Best Bid &amp; Offer. A market maker takes the other side; the limit price caps what you'll pay.</p></div>
+      <div class="hop"><div class="hn">04</div><h4>OCC clears</h4><p>The Options Clearing Corporation becomes buyer to every seller and seller to every buyer — guaranteeing the contract, erasing counterparty risk.</p></div>
+      <div class="hop"><div class="hn">05</div><h4>Settle</h4><p>The position appears in the account. Options settle T+1; the OCC holds the obligation until you close, exercise, or let it expire.</p></div>
+    </div>
+    <div class="cols" style="margin-top:36px">
+      <div class="infocard">
+        <h4><span class="mk">§</span> The pieces of the market</h4>
+        <p>U.S. listed options are one connected, standardized system — not a loose collection of dealers.</p>
+        <ul>
+          <li><b>~18 exchanges</b> quote the same contracts, linked by the NBBO so no venue trades through a better price elsewhere.</li>
+          <li><b>The OCC</b> is the sole clearinghouse — one guarantor behind every listed option in the country.</li>
+          <li><b>Market makers</b> post two-sided quotes continuously; they're the counterparty when there's no natural seller.</li>
+          <li><b>Standard terms:</b> each contract controls <b>100 shares</b>, fixed strikes and expiries — a $2.50 premium is $250 of real capital.</li>
+        </ul>
+      </div>
+      <div class="infocard">
+        <h4><span class="mk">$</span> Liquidity &amp; the spread</h4>
+        <p>Liquidity is the gap between the price you see and the price you get. Two numbers reveal it before you trade.</p>
+        <ul>
+          <li><b>Open interest</b> = contracts alive right now. Thin OI means a market maker is your only counterparty — and they set a wide price.</li>
+          <li><b>Bid/ask spread</b> is a round-trip cost you pay on entry <i>and</i> exit. On a $2.50 option a $0.40 spread is 16% gone before the thesis plays.</li>
+          <li><b>The quote is not the fill.</b> A limit at the mid asks for price improvement; a market order accepts whatever the book offers.</li>
+        </ul>
+      </div>
+      <div class="infocard">
+        <h4><span class="mk">⌥</span> Order types that matter</h4>
+        <p>The order type is a contract with the market about the worst price you'll accept.</p>
+        <ul>
+          <li><b>Limit</b> — names your max (buy) or min (sell). Sean uses these exclusively. You may not fill, but you never overpay.</li>
+          <li><b>Market</b> — fills now at any price. On options this is how you donate the spread. Sean never uses one.</li>
+          <li><b>Stop</b> — a resting trigger that becomes an order when price is hit. Sean's stops live in software, re-evaluated every 5-minute cycle.</li>
+        </ul>
+      </div>
+    </div>
+    <div class="spreadtax">
+      <h4>⚠ The spread tax — a real lesson from the desk</h4>
+      <p>Some names Sean scores well have option chains too illiquid to trade. An option quoted <span class="mono">$3.10 / $3.90</span> has a <b>26% round-trip spread</b> — the position must gain a quarter of its value just to break even on the plumbing. When the chain is that wide, the disciplined move is to <b>trade the shares instead of the option</b>, or pass. A great setup on an untradeable contract is not a trade.</p>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<section class="edu" id="lab">
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="eyebrow">Build it · defined-risk lab</span>
+      <h2>Construct a spread with a risk you decide in advance.</h2>
+      <p>A single long call has an open-ended loss up to the whole premium and pays for expensive volatility you may not need. A <b>vertical debit spread</b> — buy one strike, sell a higher one — caps both sides: you know the most you can make and the most you can lose before you enter. Re-price the example below and read the profile live.</p>
+    </div>
+    <div class="lab">
+      <div class="lab-head">
+        <h3>Bull call spread — evaluator</h3>
+        <span class="badge">Illustrative example · not a live quote</span>
+      </div>
+      <div class="lab-body">
+        <div class="lab-controls">
+          <div class="legrow"><span class="legtag buy">BUY</span> <span class="mono" id="legBuy">AAPL 230 Call</span></div>
+          <div class="legrow"><span class="legtag sell">SELL</span> <span class="mono" id="legSell">AAPL 240 Call</span></div>
+          <div class="field"><label>Long strike (buy) <span class="val"><span class="num" id="loV">230</span></span></label><input type="range" id="lo" min="180" max="260" step="1" value="230"></div>
+          <div class="field"><label>Short strike (sell) <span class="val"><span class="num" id="hiV">240</span></span></label><input type="range" id="hi" min="185" max="290" step="1" value="240"></div>
+          <div class="field"><label>Net debit paid (per share) <span class="val">$<span class="num" id="debV">4.20</span></span></label><input type="range" id="deb" min="0.25" max="14" step="0.05" value="4.20"></div>
+          <div class="field"><label for="contracts">Contracts (×100 shares each)</label><input type="number" id="contracts" min="1" max="50" step="1" value="1"></div>
+          <p class="setup-line">Underlying <b>AAPL ≈ $232</b> · ~45 DTE · width <b>$<span class="num" id="widthTxt">10</span></b>.<br>The short strike sells volatility back to fund the long — that's what defines the risk.</p>
+          <div class="presets">
+            <button data-lo="230" data-hi="240" data-deb="4.20">AAPL 230/240</button>
+            <button data-lo="230" data-hi="235" data-deb="2.10">Tighter 230/235</button>
+            <button data-lo="225" data-hi="245" data-deb="7.40">Wider 225/245</button>
+          </div>
+        </div>
+        <div class="lab-viz">
+          <div class="chartwrap"><canvas id="payoff" width="620" height="340" role="img" aria-label="Profit and loss diagram of the spread at expiration"></canvas></div>
+          <div class="metrics">
+            <div class="metric profit"><div class="ml">Max profit</div><div class="mv" id="mProfit">$580</div></div>
+            <div class="metric loss"><div class="ml">Max loss</div><div class="mv" id="mLoss">$420</div></div>
+            <div class="metric"><div class="ml">Breakeven</div><div class="mv" id="mBE">234.20</div></div>
+            <div class="metric"><div class="ml">Reward : risk</div><div class="mv" id="mRR">1.38</div></div>
+          </div>
+          <p class="verdict" id="verdict"></p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<section class="edu">
+  <div class="wrap">
+    <div class="closing">
+      <span class="eyebrow">Why it's built this way</span>
+      <h2>Trading is 20% strategy and 80% discipline — so the discipline is the code.</h2>
+      <p>Every gate, cooldown, and ladder in this walkthrough exists because a specific failure once cost real money on the paper account. Sean can't feel fear, greed, or the urge to revenge-trade — the architecture removes the need to. The strategy finds the trade; the structure keeps it small when wrong and lets it run when right.</p>
+      <p class="quote">"You don't have to be right every time. You just have to lose small when wrong and win big when right." — that sentence, rendered in Python.</p>
+    </div>
+    <footer>
+      <div class="disc">Live operations view of the Sean autonomous options agent on an Alpaca <b>paper</b> account. Board, regime, positions and gate decisions are the system's real recorded state, stamped with the time of the last scan. When live data is older than its freshness window, the pipeline strip plays a clearly-labeled simulated trade so the process stays visible. The spread lab uses illustrative strikes to teach structure — examples, not live quotes or trade recommendations. Options carry substantial risk of loss.</div>
+    </footer>
+  </div>
+</section>
+
+<script id="snapshot" type="application/json">
+{
+  "generated_at": "2026-09-05T11:53:27-04:00",
+  "stale_minutes": 45,
+  "market_date": "2026-09-04",
+  "account": {
+    "equity": 3834.44,
+    "floor": 2800,
+    "day_pnl": 0.0,
+    "week_pnl": 0.0,
+    "entries_today": 0,
+    "consecutive_losses": 3,
+    "open_count": 0,
+    "halted": false
+  },
+  "regime": {
+    "name": "trending_bullish",
+    "score": 5,
+    "sizing": 1.0,
+    "desc": "Trending Bull \u2014 SPY above both MAs, breadth strong, VIX low",
+    "vix": 14.2,
+    "spy": 770.29,
+    "rate_regime": "very_restrictive",
+    "allowed_strategies": [
+      "smc_swing",
+      "ttg_breakout",
+      "dark_pool_conviction",
+      "gap_pullback"
+    ],
+    "breadth_pct": 0.529
+  },
+  "board": [
+    {
+      "symbol": "JPM",
+      "dir": "bullish",
+      "sector": "financials",
+      "grade": "A+",
+      "conv": 12,
+      "pincer": true,
+      "counter": false,
+      "layers": 6,
+      "dp": "accum",
+      "strat": "3-2-2U",
+      "ftc": false,
+      "cmf": "bearish"
+    },
+    {
+      "symbol": "PM",
+      "dir": "bearish",
+      "sector": "unknown",
+      "grade": "A+",
+      "conv": 11,
+      "pincer": true,
+      "counter": false,
+      "layers": 6,
+      "dp": "distrib",
+      "strat": "2-1-2D",
+      "ftc": true,
+      "cmf": "bearish"
+    },
+    {
+      "symbol": "BNY",
+      "dir": "bullish",
+      "sector": "unknown",
+      "grade": "A",
+      "conv": 11,
+      "pincer": false,
+      "counter": false,
+      "layers": 5,
+      "dp": "accum",
+      "strat": "2-2U",
+      "ftc": false,
+      "cmf": "neutral"
+    },
+    {
+      "symbol": "HIMS",
+      "dir": "bearish",
+      "sector": "healthcare_services",
+      "grade": "A",
+      "conv": 10,
+      "pincer": false,
+      "counter": true,
+      "layers": 5,
+      "dp": "distrib",
+      "strat": "2-2D",
+      "ftc": false,
+      "cmf": "bearish"
+    },
+    {
+      "symbol": "HOOD",
+      "dir": "bullish",
+      "sector": "fintech",
+      "grade": "A",
+      "conv": 10,
+      "pincer": false,
+      "counter": false,
+      "layers": 5,
+      "dp": "accum",
+      "strat": "\u2014",
+      "ftc": false,
+      "cmf": "bullish"
+    },
+    {
+      "symbol": "INSM",
+      "dir": "bullish",
+      "sector": "unknown",
+      "grade": "A",
+      "conv": 10,
+      "pincer": false,
+      "counter": false,
+      "layers": 5,
+      "dp": "none",
+      "strat": "2-2U",
+      "ftc": false,
+      "cmf": "bullish"
+    },
+    {
+      "symbol": "NOC",
+      "dir": "bearish",
+      "sector": "defense_aerospace",
+      "grade": "A",
+      "conv": 10,
+      "pincer": false,
+      "counter": false,
+      "layers": 7,
+      "dp": "distrib",
+      "strat": "2-2D",
+      "ftc": true,
+      "cmf": "bearish"
+    },
+    {
+      "symbol": "NVDA",
+      "dir": "bullish",
+      "sector": "semiconductors",
+      "grade": "A",
+      "conv": 10,
+      "pincer": false,
+      "counter": false,
+      "layers": 6,
+      "dp": "accum",
+      "strat": "2-2U",
+      "ftc": true,
+      "cmf": "bearish"
+    },
+    {
+      "symbol": "PEP",
+      "dir": "bearish",
+      "sector": "consumer_staples",
+      "grade": "A",
+      "conv": 10,
+      "pincer": false,
+      "counter": false,
+      "layers": 6,
+      "dp": "accum",
+      "strat": "3-2-2D",
+      "ftc": false,
+      "cmf": "bullish"
+    },
+    {
+      "symbol": "RDDT",
+      "dir": "bearish",
+      "sector": "consumer_discretionary",
+      "grade": "A",
+      "conv": 10,
+      "pincer": false,
+      "counter": false,
+      "layers": 6,
+      "dp": "distrib",
+      "strat": "\u2014",
+      "ftc": false,
+      "cmf": "bearish"
+    },
+    {
+      "symbol": "SMCI",
+      "dir": "bullish",
+      "sector": "semiconductors",
+      "grade": "A",
+      "conv": 10,
+      "pincer": false,
+      "counter": false,
+      "layers": 6,
+      "dp": "accum",
+      "strat": "3-2-2U",
+      "ftc": false,
+      "cmf": "neutral"
+    },
+    {
+      "symbol": "SNDK",
+      "dir": "bullish",
+      "sector": "semiconductors",
+      "grade": "A",
+      "conv": 10,
+      "pincer": false,
+      "counter": false,
+      "layers": 6,
+      "dp": "accum",
+      "strat": "2-1-2U",
+      "ftc": false,
+      "cmf": "bullish"
+    },
+    {
+      "symbol": "SPGI",
+      "dir": "bullish",
+      "sector": "financials",
+      "grade": "A",
+      "conv": 10,
+      "pincer": false,
+      "counter": false,
+      "layers": 5,
+      "dp": "accum",
+      "strat": "\u2014",
+      "ftc": false,
+      "cmf": "bullish"
+    },
+    {
+      "symbol": "IOT",
+      "dir": "bullish",
+      "sector": "unknown",
+      "grade": "B",
+      "conv": 9,
+      "pincer": false,
+      "counter": false,
+      "layers": 4,
+      "dp": "none",
+      "strat": "2-1-2U",
+      "ftc": false,
+      "cmf": "bearish"
+    },
+    {
+      "symbol": "LULU",
+      "dir": "bearish",
+      "sector": "unknown",
+      "grade": "B",
+      "conv": 9,
+      "pincer": false,
+      "counter": false,
+      "layers": 5,
+      "dp": "none",
+      "strat": "\u2014",
+      "ftc": false,
+      "cmf": "neutral"
+    },
+    {
+      "symbol": "APLE",
+      "dir": "bearish",
+      "sector": "real_estate",
+      "grade": "B",
+      "conv": 9,
+      "pincer": false,
+      "counter": false,
+      "layers": 5,
+      "dp": "none",
+      "strat": "2-2D",
+      "ftc": true,
+      "cmf": "neutral"
+    },
+    {
+      "symbol": "ARRY",
+      "dir": "bearish",
+      "sector": "ev_clean_energy",
+      "grade": "B",
+      "conv": 9,
+      "pincer": false,
+      "counter": false,
+      "layers": 5,
+      "dp": "none",
+      "strat": "2-1-2D",
+      "ftc": true,
+      "cmf": "bearish"
+    },
+    {
+      "symbol": "BBY",
+      "dir": "bullish",
+      "sector": "unknown",
+      "grade": "B",
+      "conv": 9,
+      "pincer": false,
+      "counter": false,
+      "layers": 4,
+      "dp": "none",
+      "strat": "2-1-2U",
+      "ftc": false,
+      "cmf": "bullish"
+    },
+    {
+      "symbol": "BE",
+      "dir": "bullish",
+      "sector": "ev_clean_energy",
+      "grade": "B",
+      "conv": 9,
+      "pincer": false,
+      "counter": true,
+      "layers": 5,
+      "dp": "accum",
+      "strat": "2-2U",
+      "ftc": false,
+      "cmf": "bearish"
+    },
+    {
+      "symbol": "BKNG",
+      "dir": "bearish",
+      "sector": "consumer_discretionary",
+      "grade": "B",
+      "conv": 9,
+      "pincer": false,
+      "counter": false,
+      "layers": 5,
+      "dp": "none",
+      "strat": "\u2014",
+      "ftc": false,
+      "cmf": "bearish"
+    },
+    {
+      "symbol": "BMY",
+      "dir": "bullish",
+      "sector": "biotech_pharma",
+      "grade": "B",
+      "conv": 9,
+      "pincer": false,
+      "counter": false,
+      "layers": 4,
+      "dp": "accum",
+      "strat": "\u2014",
+      "ftc": false,
+      "cmf": "bullish"
+    },
+    {
+      "symbol": "C",
+      "dir": "bullish",
+      "sector": "financials",
+      "grade": "B",
+      "conv": 9,
+      "pincer": false,
+      "counter": false,
+      "layers": 5,
+      "dp": "accum",
+      "strat": "\u2014",
+      "ftc": false,
+      "cmf": "neutral"
+    },
+    {
+      "symbol": "CAH",
+      "dir": "bullish",
+      "sector": "unknown",
+      "grade": "B",
+      "conv": 9,
+      "pincer": false,
+      "counter": false,
+      "layers": 4,
+      "dp": "accum",
+      "strat": "2-2U",
+      "ftc": false,
+      "cmf": "bearish"
+    },
+    {
+      "symbol": "CHPT",
+      "dir": "bullish",
+      "sector": "ev_clean_energy",
+      "grade": "B",
+      "conv": 9,
+      "pincer": false,
+      "counter": true,
+      "layers": 6,
+      "dp": "none",
+      "strat": "2-2U",
+      "ftc": false,
+      "cmf": "bullish"
+    }
+  ],
+  "board_count": 124,
+  "positions": [],
+  "recent": [
+    {
+      "symbol": "XLRE",
+      "dir": "bullish",
+      "grade": "A Grade",
+      "pnl": -39.0,
+      "status": "closed",
+      "exit": "2026-08-25"
+    },
+    {
+      "symbol": "XLRE",
+      "dir": "bullish",
+      "grade": "A Grade",
+      "pnl": -39.0,
+      "status": "stopped",
+      "exit": "2026-08-25"
+    },
+    {
+      "symbol": "XLRE",
+      "dir": "bullish",
+      "grade": "A Grade",
+      "pnl": -39.0,
+      "status": "stopped",
+      "exit": "2026-08-25"
+    },
+    {
+      "symbol": "TEVA",
+      "dir": "bullish",
+      "grade": "Reconciled",
+      "pnl": -60.0,
+      "status": "stopped",
+      "exit": "2026-08-14"
+    }
+  ],
+  "gates": [
+    {
+      "symbol": "WFC",
+      "grade": "A+",
+      "dir": "bullish",
+      "passed": false,
+      "blocker": "Market hours",
+      "gates": "22/23",
+      "ts": "2026-09-03T16:27:50"
+    },
+    {
+      "symbol": "WFC",
+      "grade": "A+",
+      "dir": "bullish",
+      "passed": false,
+      "blocker": "Market hours",
+      "gates": "22/23",
+      "ts": "2026-09-03T16:19:16"
+    },
+    {
+      "symbol": "WFC",
+      "grade": "A+",
+      "dir": "bullish",
+      "passed": false,
+      "blocker": "Market hours",
+      "gates": "22/23",
+      "ts": "2026-09-03T16:10:49"
+    },
+    {
+      "symbol": "WFC",
+      "grade": "A+",
+      "dir": "bullish",
+      "passed": false,
+      "blocker": "Market hours",
+      "gates": "22/23",
+      "ts": "2026-09-03T16:02:08"
+    },
+    {
+      "symbol": "AAPD",
+      "grade": "A",
+      "dir": "bearish",
+      "passed": false,
+      "blocker": "Market hours",
+      "gates": "22/23",
+      "ts": "2026-09-02T16:25:11"
+    },
+    {
+      "symbol": "AAPD",
+      "grade": "A",
+      "dir": "bearish",
+      "passed": false,
+      "blocker": "Market hours",
+      "gates": "22/23",
+      "ts": "2026-09-02T16:15:32"
+    },
+    {
+      "symbol": "TPG",
+      "grade": "A",
+      "dir": "bullish",
+      "passed": false,
+      "blocker": "Market hours",
+      "gates": "22/23",
+      "ts": "2026-08-28T16:26:06"
+    },
+    {
+      "symbol": "TPG",
+      "grade": "A",
+      "dir": "bullish",
+      "passed": false,
+      "blocker": "Market hours",
+      "gates": "22/23",
+      "ts": "2026-08-28T16:18:22"
+    },
+    {
+      "symbol": "XLRE",
+      "grade": "A",
+      "dir": "bullish",
+      "passed": true,
+      "blocker": "",
+      "gates": "23/23",
+      "ts": "2026-08-25T11:36:59"
+    },
+    {
+      "symbol": "XLRE",
+      "grade": "A",
+      "dir": "bullish",
+      "passed": true,
+      "blocker": "",
+      "gates": "23/23",
+      "ts": "2026-08-25T11:36:58"
+    },
+    {
+      "symbol": "COP",
+      "grade": "A+",
+      "dir": "bullish",
+      "passed": false,
+      "blocker": "Market hours",
+      "gates": "22/23",
+      "ts": "2026-08-19T16:23:52"
+    },
+    {
+      "symbol": "OXY",
+      "grade": "A",
+      "dir": "bullish",
+      "passed": false,
+      "blocker": "Market hours",
+      "gates": "22/23",
+      "ts": "2026-08-18T16:11:37"
+    }
+  ]
+}
+</script>
+
+<script>
+(function(){
+  "use strict";
+  var root=document.documentElement;
+  var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  /* ---------- theme ---------- */
+  (function(){
+    var btn=document.getElementById('themeBtn'), icon=document.getElementById('themeIcon');
+    var modes=['system','light','dark'], mi=0;
+    try{ var s=localStorage.getItem('sean-theme'); if(s){ var k=modes.indexOf(s); if(k>=0) mi=k; } }catch(e){}
+    function apply(){
+      var m=modes[mi];
+      if(m==='system'){ root.removeAttribute('data-theme'); icon.textContent='◐'; }
+      else{ root.setAttribute('data-theme',m); icon.textContent=(m==='dark'?'●':'○'); }
+      try{ localStorage.setItem('sean-theme',m); }catch(e){}
+      if(window.__redraw) window.__redraw();
+    }
+    btn.addEventListener('click',function(){ mi=(mi+1)%modes.length; apply(); });
+    apply();
+  })();
+
+  /* ---------- snapshot ---------- */
+  var SNAP={};
+  try{ SNAP=JSON.parse(document.getElementById('snapshot').textContent); }catch(e){ SNAP={}; }
+  function esc(s){ return String(s==null?'':s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];}); }
+  function fmtMoney(n){ if(n==null||isNaN(n)) return '—'; var s=(n<0?'−':'')+'$'+Math.abs(Math.round(n)).toLocaleString('en-US'); return s; }
+  function minsSince(iso){ try{ return (Date.now()-new Date(iso).getTime())/60000; }catch(e){ return 1e9; } }
+  function agoText(iso){
+    var m=minsSince(iso); if(m<1) return 'just now'; if(m<60) return Math.round(m)+'m ago';
+    var h=m/60; if(h<24) return Math.round(h)+'h ago'; return Math.round(h/24)+'d ago';
+  }
+
+  /* ---------- render real snapshot panels ---------- */
+  function gCls(g){ g=(g||'').toUpperCase(); return g==='A+'?'ap':(g==='A'?'a':'b'); }
+  function renderBoard(){
+    var el=document.getElementById('board'); if(!el) return;
+    var rows=SNAP.board||[];
+    el.innerHTML = rows.map(function(r){
+      var dir=r.dir==='bullish';
+      var dpTxt = r.dp==='accum'?'accum':(r.dp==='distrib'?'distrib':'no flow');
+      return '<div class="brow" data-sym="'+esc(r.symbol)+'">'+
+        '<span class="gbadge '+gCls(r.grade)+'">'+esc(r.grade)+'</span>'+
+        '<div class="bmid"><div class="bsym">'+esc(r.symbol)+
+          ' <span class="arrow '+(dir?'bull':'bear')+'">'+(dir?'▲ call':'▼ put')+'</span>'+
+          (r.pincer?' <span class="pill">pincer</span>':'')+(r.counter?' <span class="pill">counter</span>':'')+'</div>'+
+        '<div class="btags"><span class="dp '+esc(r.dp)+'">◧ '+dpTxt+'</span>'+
+          '<span>strat '+esc(r.strat)+'</span>'+(r.ftc?'<span class="ftc">FTC</span>':'')+
+          '<span>'+esc(r.sector)+'</span></div></div>'+
+        '<div class="bconv"><b>'+esc(r.conv)+'</b>'+esc(r.layers)+' layers</div>'+
+      '</div>';
+    }).join('');
+    var meta=document.getElementById('boardMeta');
+    if(meta) meta.textContent=(SNAP.board_count||rows.length)+' scanned · top '+rows.length;
+  }
+  function renderRegime(){
+    var el=document.getElementById('regime'); if(!el||!SNAP.regime) return;
+    var r=SNAP.regime, bull=(r.name||'').indexOf('bull')>=0;
+    el.innerHTML =
+      '<div class="rtop"><span class="rname">'+esc((r.name||'').replace(/_/g,' '))+'</span>'+
+        '<span class="rchip '+(bull?'bull':'')+'">score '+esc(r.score)+' · sizing '+esc(r.sizing)+'×</span></div>'+
+      '<div class="rdesc">'+esc(r.desc)+'</div>'+
+      '<div class="rmini"><span>VIX <b>'+esc(r.vix)+'</b></span><span>SPY <b>'+esc(r.spy)+'</b></span>'+
+        '<span>breadth <b>'+Math.round((r.breadth_pct||0)*100)+'%</b></span>'+
+        '<span>rates <b>'+esc((r.rate_regime||'').replace(/_/g,' '))+'</b></span></div>'+
+      '<div class="strats">'+(r.allowed_strategies||[]).map(function(s){return '<span>'+esc(s)+'</span>';}).join('')+'</div>';
+    var meta=document.getElementById('regimeMeta'); if(meta) meta.textContent='updated '+agoText(SNAP.generated_at);
+  }
+  function renderTiles(){
+    var el=document.getElementById('tiles'); if(!el||!SNAP.account) return;
+    var a=SNAP.account, gap=a.equity-a.floor;
+    function tile(l,v,cls){ return '<div class="tile"><div class="tl">'+l+'</div><div class="tv '+(cls||'')+'">'+v+'</div></div>'; }
+    el.innerHTML =
+      tile('Equity','$'+(a.equity||0).toLocaleString('en-US',{minimumFractionDigits:0,maximumFractionDigits:0})) +
+      tile('Floor gap','$'+Math.round(gap).toLocaleString('en-US')+' <small>above</small>','up') +
+      tile('Day P&amp;L', fmtMoney(a.day_pnl), a.day_pnl>0?'up':(a.day_pnl<0?'down':'')) +
+      tile('Entries', (a.entries_today||0)+' <small>/ 3</small>') +
+      tile('Week P&amp;L', fmtMoney(a.week_pnl), a.week_pnl>0?'up':(a.week_pnl<0?'down':'')) +
+      tile('Open pos', (a.open_count||0)+' <small>/ 3</small>') +
+      tile('Loss streak', (a.consecutive_losses||0)+'', a.consecutive_losses>=3?'down':'') +
+      tile('Halt', a.halted?'ON':'clear', a.halted?'down':'up');
+  }
+  function renderPositions(){
+    var el=document.getElementById('positions'); if(!el) return;
+    var pos=SNAP.positions||[], meta=document.getElementById('posMeta');
+    if(meta) meta.textContent=pos.length+' open';
+    if(!pos.length){
+      el.innerHTML='<div class="empty">Flat — <b>no open positions.</b> The board is built and the machine is hunting; an entry fires only when a top candidate clears all 23 gates inside the 10:45–15:15 ET window.</div>';
+      return;
+    }
+    el.innerHTML=pos.map(function(p){
+      return '<div class="posrow"><div class="bsym">'+esc(p.symbol)+' '+esc(p.strike)+esc((p.type||'').charAt(0).toUpperCase())+
+        ' <span class="arrow '+(p.dir==='bullish'?'bull':'bear')+'">'+esc(p.grade||'')+'</span></div>'+
+        '<div class="btags"><span>entry $'+esc(p.entry)+'</span><span>stop $'+esc(p.stop)+'</span><span>target $'+esc(p.target)+'</span><span>'+esc(p.horizon||'')+'</span></div></div>';
+    }).join('');
+  }
+  function renderGates(){
+    var el=document.getElementById('gates'); if(!el) return;
+    el.innerHTML=(SNAP.gates||[]).map(function(g){
+      var pass=g.passed;
+      return '<div class="frow"><span class="fstat '+(pass?'pass':'block')+'">'+(pass?'PASS':'BLOCK')+'</span>'+
+        '<div class="fmid"><span class="fsym">'+esc(g.symbol)+'</span> <span class="freason">'+esc(g.grade)+' · '+(pass?'all gates clear':('stopped at '+esc(g.blocker)))+'</span></div>'+
+        '<div class="fright">'+esc(g.gates)+'<br>'+esc((g.ts||'').slice(5,10))+'</div></div>';
+    }).join('');
+  }
+  function renderRecent(){
+    var el=document.getElementById('recent'); if(!el) return;
+    el.innerHTML=(SNAP.recent||[]).map(function(r){
+      var up=r.pnl>0;
+      return '<div class="rrow"><span class="rsym">'+esc(r.symbol)+' <span class="arrow '+(r.dir==='bullish'?'bull':'bear')+'">'+(r.dir==='bullish'?'call':'put')+'</span></span>'+
+        '<span class="rpnl '+(up?'up':'down')+'">'+fmtMoney(r.pnl)+'</span>'+
+        '<span class="rst">'+esc(r.status)+' · '+esc((r.exit||'').slice(5))+'</span></div>';
+    }).join('');
+  }
+  renderBoard(); renderRegime(); renderTiles(); renderPositions(); renderGates(); renderRecent();
+
+  /* ---------- LIVE vs DEMO mode ---------- */
+  var ribbon=document.getElementById('ribbon'),
+      badge=document.getElementById('stateBadge'),
+      fresh=document.getElementById('freshness'),
+      pipeTag=document.getElementById('pipeTag'),
+      pipeStatus=document.getElementById('pipeStatus'),
+      pipePnl=document.getElementById('pipePnl'),
+      mAuto=document.getElementById('mAuto'), mDemo=document.getElementById('mDemo');
+  var stEls={};
+  Array.prototype.forEach.call(document.querySelectorAll('.st'),function(s){ stEls[s.dataset.k]=s; });
+
+  var isFresh = minsSince(SNAP.generated_at) < (SNAP.stale_minutes||45);
+  var forceDemo=false;   // Auto by default; "Watch demo" forces demo
+
+  function setStations(activeKey, doneKeys){
+    Object.keys(stEls).forEach(function(k){
+      var e=stEls[k]; e.classList.remove('active','done');
+      if(doneKeys.indexOf(k)>=0) e.classList.add('done');
+      if(k===activeKey) e.classList.add('active');
+    });
+  }
+  function setFreshness(){
+    if(isFresh && !forceDemo){
+      ribbon.classList.remove('mode-demo'); ribbon.classList.add('mode-live');
+      badge.textContent='LIVE';
+      fresh.innerHTML='Live · updated <b>'+agoText(SNAP.generated_at)+'</b>';
+    } else {
+      ribbon.classList.remove('mode-live'); ribbon.classList.add('mode-demo');
+      badge.textContent='DEMO';
+      fresh.innerHTML='Last live scan <b>'+esc(SNAP.market_date)+' '+esc(SNAP.scorer_time)+'</b> · pipeline showing a simulated trade';
+    }
+  }
+
+  /* live pipeline (real state, no fake trade) */
+  var STAGES=['find','filter','execute','profit','exit'];
+  function runLive(){
+    pipeTag.hidden=true;
+    var pos=SNAP.positions||[];
+    if(pos.length){
+      // reflect the furthest-along position on the ladder
+      var p=pos[0], done=['find','filter','execute'], active='profit';
+      if(p.tier3) { done=done.concat(['profit']); active='exit'; }
+      setStations(active, done);
+      pipeStatus.textContent='Managing '+p.symbol+' '+p.strike+(p.type||'').charAt(0).toUpperCase()+' — '+(p.grade||'');
+      pipePnl.className='pnl flat'; pipePnl.textContent='';
+    } else {
+      setStations('find', []);
+      var top=(SNAP.board&&SNAP.board[0])||null;
+      pipeStatus.textContent = top
+        ? 'Scanning '+(SNAP.board_count||'—')+' candidates · top setup '+top.symbol+' '+top.grade+' ('+(top.dir==='bullish'?'call':'put')+')'
+        : 'Scanning the board — flat, hunting for a qualified setup';
+      pipePnl.className='pnl flat'; pipePnl.textContent='flat';
+    }
+  }
+
+  /* demo pipeline (a scripted trade loops through all five stages) */
+  var demoTimer=null, demoTrades=[
+    {sym:'NVDA', side:'call', strike:'150C', entry:3.10, gates:23},
+    {sym:'PM',   side:'put',  strike:'165P', entry:2.85, gates:23},
+    {sym:'HOOD', side:'call', strike:'92C',  entry:2.40, gates:23}
+  ], demoIx=0;
+
+  function clearDemo(){ if(demoTimer){ clearTimeout(demoTimer); demoTimer=null; } }
+  function tween(el, from, to, ms, fmt){
+    if(reduce){ el.textContent=fmt(to); return; }
+    var t0=performance.now();
+    function step(t){
+      var k=Math.min(1,(t-t0)/ms), v=from+(to-from)*k;
+      el.textContent=fmt(v);
+      if(k<1) requestAnimationFrame(step);
+    }
+    requestAnimationFrame(step);
+  }
+  function runDemo(){
+    clearDemo();
+    pipeTag.hidden=false;
+    var tr=demoTrades[demoIx % demoTrades.length];
+    var seq=[];
+    seq.push([1600,function(){ setStations('find',[]); pipeStatus.textContent='Scanning 124 candidates — '+tr.sym+' surfaces (A-grade)'; pipePnl.className='pnl flat'; pipePnl.textContent=''; }]);
+    seq.push([2000,function(){ setStations('filter',['find']); var g=0; pipeStatus.textContent='Checking 23 gates…';
+      if(!reduce){ var gi=setInterval(function(){ g++; pipeStatus.textContent='Gate '+g+'/23 clear…'; if(g>=23){ clearInterval(gi); } },70); } }]);
+    seq.push([1500,function(){ setStations('execute',['find','filter']); pipeStatus.textContent='DAY limit — buy 1 '+tr.sym+' '+tr.strike+' @ $'+tr.entry.toFixed(2)+' · filled ✓'; pipePnl.className='pnl flat'; pipePnl.textContent='$0'; }]);
+    seq.push([1800,function(){ setStations('profit',['find','filter','execute']); pipeStatus.textContent='+25% — sold 25%, runner 75%'; pipePnl.className='pnl up'; tween(pipePnl,0,tr.entry*0.25*100,1400,function(v){return '+'+fmtMoney(v);}); }]);
+    seq.push([1800,function(){ pipeStatus.textContent='+50% — sold 25%, stop → breakeven (free trade)'; tween(pipePnl,tr.entry*0.25*100,tr.entry*0.50*100,1400,function(v){return '+'+fmtMoney(v);}); }]);
+    seq.push([1800,function(){ pipeStatus.textContent='+75% — sold 25%, runner 25%'; tween(pipePnl,tr.entry*0.50*100,tr.entry*0.75*100,1400,function(v){return '+'+fmtMoney(v);}); }]);
+    seq.push([1800,function(){ setStations('exit',['find','filter','execute','profit']); pipeStatus.textContent='+100% — final quarter closed'; tween(pipePnl,tr.entry*0.75*100,tr.entry*1.0*100,1400,function(v){return '+'+fmtMoney(v);}); }]);
+    seq.push([2200,function(){ setStations(null,['find','filter','execute','profit','exit']); pipeStatus.textContent=tr.sym+' closed +'+fmtMoney(tr.entry*100)+' · scanning for the next setup'; }]);
+    var i=0;
+    (function next(){
+      if(i>=seq.length){ demoIx++; demoTimer=setTimeout(runDemo, 400); return; }
+      var stepDef=seq[i++]; stepDef[1](); demoTimer=setTimeout(next, stepDef[0]);
+    })();
+  }
+
+  function applyMode(){
+    setFreshness();
+    if(isFresh && !forceDemo){ clearDemo(); runLive(); }
+    else { runDemo(); }
+    mAuto.setAttribute('aria-pressed', String(!forceDemo));
+    mDemo.setAttribute('aria-pressed', String(forceDemo));
+  }
+  mAuto.addEventListener('click',function(){ forceDemo=false; applyMode(); });
+  mDemo.addEventListener('click',function(){ forceDemo=true; applyMode(); });
+  applyMode();
+  // keep the "updated Xm ago" honest
+  setInterval(function(){ if(ribbon.classList.contains('mode-live')) setFreshness(); }, 60000);
+
+  /* ---------- spread lab ---------- */
+  (function(){
+    var lo=document.getElementById('lo'), hi=document.getElementById('hi'), deb=document.getElementById('deb'),
+        contracts=document.getElementById('contracts'),
+        loV=document.getElementById('loV'), hiV=document.getElementById('hiV'), debV=document.getElementById('debV'),
+        widthTxt=document.getElementById('widthTxt'), legBuy=document.getElementById('legBuy'), legSell=document.getElementById('legSell'),
+        mProfit=document.getElementById('mProfit'), mLoss=document.getElementById('mLoss'),
+        mBE=document.getElementById('mBE'), mRR=document.getElementById('mRR'), verdict=document.getElementById('verdict'),
+        cv=document.getElementById('payoff');
+    if(!cv) return;
+    function cssVar(n){ return getComputedStyle(root).getPropertyValue(n).trim(); }
+    function fmt(n){ return n.toLocaleString('en-US'); }
+    function readState(){
+      var L=+lo.value, H=+hi.value, D=+deb.value, N=Math.max(1,Math.min(50,+contracts.value||1));
+      if(H<=L){ H=L+1; hi.value=H; }
+      var maxD=Math.max(0.05,H-L-0.05); if(D>maxD){ D=maxD; deb.value=D.toFixed(2); }
+      return {L:L,H:H,D:D,N:N,width:H-L};
+    }
+    function draw(st){
+      var ctx=cv.getContext('2d');
+      var dpr=Math.min(window.devicePixelRatio||1,2), cssW=cv.clientWidth||620, cssH=340;
+      cv.width=cssW*dpr; cv.height=cssH*dpr; cv.style.height=cssH+'px'; ctx.setTransform(dpr,0,0,dpr,0,0); ctx.clearRect(0,0,cssW,cssH);
+      var col={text:cssVar('--text'),dim:cssVar('--text-faint'),line:cssVar('--line'),lineS:cssVar('--line-strong'),long:cssVar('--long'),longS:cssVar('--long-soft'),short:cssVar('--short'),shortS:cssVar('--short-soft'),accent:cssVar('--accent-line')};
+      var padL=52,padR=22,padT=22,padB=40, W=cssW-padL-padR, Hh=cssH-padT-padB;
+      var maxProfit=st.width-st.D, maxLoss=st.D, be=st.L+st.D;
+      var xmin=st.L-st.width*1.6, xmax=st.H+st.width*1.6, ypad=Math.max(maxProfit,maxLoss)*0.28+0.2, ymax=maxProfit+ypad, ymin=-(maxLoss+ypad);
+      function X(p){ return padL+(p-xmin)/(xmax-xmin)*W; } function Y(v){ return padT+(ymax-v)/(ymax-ymin)*Hh; }
+      var y0=Y(0);
+      ctx.font='11px "IBM Plex Mono", monospace'; ctx.textBaseline='middle';
+      [maxProfit,maxProfit/2,0,-maxLoss/2,-maxLoss].forEach(function(t){
+        var yy=Y(t); ctx.strokeStyle=col.line; ctx.globalAlpha=(Math.abs(t)<1e-6)?0.9:0.5; ctx.lineWidth=1;
+        ctx.beginPath(); ctx.moveTo(padL,yy); ctx.lineTo(padL+W,yy); ctx.stroke();
+        ctx.globalAlpha=1; ctx.fillStyle=col.dim; ctx.textAlign='right';
+        ctx.fillText((t>=0?'+':'−')+'$'+Math.round(Math.abs(t)*100), padL-8, yy);
+      });
+      function payoff(p){ if(p<=st.L) return -st.D; if(p>=st.H) return maxProfit; return (p-st.L)-st.D; }
+      function areaFill(clipTop,clipH,color){
+        ctx.save(); ctx.beginPath(); ctx.rect(padL,clipTop,W,clipH); ctx.clip();
+        ctx.beginPath(); var step=(xmax-xmin)/240, first=true;
+        for(var p=xmin;p<=xmax+1e-9;p+=step){ var xv=X(p),yv=Y(payoff(p)); if(first){ctx.moveTo(xv,yv);first=false;}else ctx.lineTo(xv,yv);}
+        ctx.lineTo(X(xmax),y0); ctx.lineTo(X(xmin),y0); ctx.closePath();
+        ctx.fillStyle=color; ctx.globalAlpha=.75; ctx.fill(); ctx.restore(); ctx.globalAlpha=1;
+      }
+      areaFill(padT,y0-padT,col.longS); areaFill(y0,padT+Hh-y0,col.shortS);
+      ctx.strokeStyle=col.accent; ctx.setLineDash([4,4]); ctx.lineWidth=1.5;
+      ctx.beginPath(); ctx.moveTo(X(be),padT); ctx.lineTo(X(be),padT+Hh); ctx.stroke(); ctx.setLineDash([]);
+      ctx.fillStyle=col.accent; ctx.textAlign='center'; ctx.font='600 11px "IBM Plex Mono", monospace'; ctx.fillText('BE '+be.toFixed(2), X(be), padT+10);
+      ctx.strokeStyle=col.lineS; ctx.globalAlpha=.5; ctx.lineWidth=1;
+      [st.L,st.H].forEach(function(k){ ctx.beginPath(); ctx.moveTo(X(k),padT); ctx.lineTo(X(k),padT+Hh); ctx.stroke(); }); ctx.globalAlpha=1;
+      ctx.strokeStyle=col.text; ctx.lineWidth=2.4; ctx.lineJoin='round';
+      ctx.beginPath(); ctx.moveTo(X(xmin),Y(-st.D)); ctx.lineTo(X(st.L),Y(-st.D)); ctx.lineTo(X(st.H),Y(maxProfit)); ctx.lineTo(X(xmax),Y(maxProfit)); ctx.stroke();
+      ctx.fillStyle=col.short; ctx.beginPath(); ctx.arc(X(st.L),Y(-st.D),4,0,7); ctx.fill();
+      ctx.fillStyle=col.long; ctx.beginPath(); ctx.arc(X(st.H),Y(maxProfit),4,0,7); ctx.fill();
+      ctx.fillStyle=col.dim; ctx.font='11px "IBM Plex Mono", monospace'; ctx.textAlign='center'; ctx.textBaseline='top';
+      ctx.fillText('$'+st.L, X(st.L), padT+Hh+8); ctx.fillText('$'+st.H, X(st.H), padT+Hh+8);
+      ctx.textAlign='left'; ctx.fillText('underlying at expiration →', padL, padT+Hh+22);
+    }
+    function update(){
+      var st=readState();
+      loV.textContent=st.L; hiV.textContent=st.H; debV.textContent=st.D.toFixed(2); widthTxt.textContent=st.width;
+      legBuy.textContent='AAPL '+st.L+' Call'; legSell.textContent='AAPL '+st.H+' Call';
+      var maxProfit=(st.width-st.D)*100*st.N, maxLoss=st.D*100*st.N, be=st.L+st.D, rr=(st.width-st.D)/st.D;
+      mProfit.textContent='$'+fmt(Math.round(maxProfit)); mLoss.textContent='−$'+fmt(Math.round(maxLoss));
+      mBE.textContent=be.toFixed(2); mRR.textContent=rr.toFixed(2);
+      var rrTxt = rr>=1.5?'<b>a favorable '+rr.toFixed(2)+':1</b> — inside Sean’s 2:1 target zone'
+                : rr>=1?'<b>'+rr.toFixed(2)+':1</b> — acceptable but below the 2:1 ideal'
+                       :'<b>'+rr.toFixed(2)+':1</b> — you’re risking more than you can make; widen the strikes or pay less';
+      verdict.innerHTML='On '+st.N+' contract'+(st.N>1?'s':'')+', the most you can lose is <b>−$'+fmt(Math.round(maxLoss))+
+        '</b> and the most you can make is <b>+$'+fmt(Math.round(maxProfit))+'</b>, with AAPL needing to close above <b>$'+be.toFixed(2)+
+        '</b> to profit. That’s '+rrTxt+'.';
+      draw(st);
+    }
+    window.__redraw=update;
+    [lo,hi,deb,contracts].forEach(function(el){ el.addEventListener('input',update); });
+    document.querySelectorAll('.presets button').forEach(function(b){
+      b.addEventListener('click',function(){ lo.value=b.dataset.lo; hi.value=b.dataset.hi; deb.value=b.dataset.deb; update(); });
+    });
+    var rt; window.addEventListener('resize',function(){ clearTimeout(rt); rt=setTimeout(update,120); });
+    update();
+  })();
+})();
+</script>
