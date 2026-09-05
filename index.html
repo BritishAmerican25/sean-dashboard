@@ -219,6 +219,57 @@
   .rrow .rpnl.up{color:var(--long)} .rrow .rpnl.down{color:var(--short)}
   .rrow .rst{font-family:var(--mono); font-size:11px; color:var(--text-faint)}
 
+  /* ---------- sector map ---------- */
+  .band{padding:8px 0 0}
+  .band-h{display:flex; align-items:baseline; gap:12px; flex-wrap:wrap; margin:26px 0 14px}
+  .band-h h2{font-family:var(--disp); font-weight:700; font-size:20px; letter-spacing:-.01em}
+  .band-h .meta{font-family:var(--mono); font-size:11.5px; color:var(--text-faint)}
+  .band-h .legend{margin-left:auto; display:flex; gap:12px; font-family:var(--mono); font-size:11px; color:var(--text-dim); flex-wrap:wrap}
+  .band-h .legend i{font-style:normal; display:inline-flex; align-items:center; gap:5px}
+  .band-h .legend .sw{width:9px; height:9px; border-radius:2px; display:inline-block}
+  .secgrid{display:grid; grid-template-columns:repeat(auto-fill,minmax(224px,1fr)); gap:12px}
+  .sec{background:var(--panel); border:1px solid var(--line); border-radius:14px; padding:14px 16px 15px 18px;
+    box-shadow:var(--shadow); position:relative; overflow:hidden}
+  .sec .stripe{position:absolute; left:0; top:0; bottom:0; width:4px; background:var(--text-faint)}
+  .sec.pos .stripe{background:var(--long)} .sec.neg .stripe{background:var(--short)}
+  .sec-top{display:flex; justify-content:space-between; align-items:flex-start; gap:8px}
+  .sec-name{font-family:var(--disp); font-weight:700; font-size:15px; line-height:1.1}
+  .sec-etf{font-family:var(--mono); font-size:10.5px; color:var(--text-faint); margin-top:2px}
+  .sec-mom{font-family:var(--disp); font-weight:800; font-size:19px; font-variant-numeric:tabular-nums; text-align:right; white-space:nowrap}
+  .sec-mom.up{color:var(--long)} .sec-mom.down{color:var(--short)}
+  .sec-mom small{display:block; font-size:9.5px; font-weight:500; color:var(--text-faint); letter-spacing:.04em}
+  .sec-bar{height:5px; border-radius:3px; background:var(--surface-2); margin-top:11px; position:relative}
+  .sec-bar .zero{position:absolute; left:50%; top:-2px; bottom:-2px; width:1px; background:var(--line-strong)}
+  .sec-bar .fill{position:absolute; top:0; bottom:0; border-radius:3px}
+  .sec-bar .fill.up{background:var(--long)} .sec-bar .fill.down{background:var(--short)}
+  .sec-meta{display:flex; gap:6px; flex-wrap:wrap; margin-top:11px}
+  .sec-meta .mchip{font-family:var(--mono); font-size:10.5px; color:var(--text-dim); background:var(--surface-2);
+    border:1px solid var(--line); border-radius:6px; padding:3px 7px}
+  .sec-meta .mchip b{color:var(--text); font-weight:600}
+  .riskchip{font-family:var(--mono); font-size:10.5px; font-weight:600; border-radius:6px; padding:3px 8px; border:1px solid}
+  .riskchip.low{color:var(--long); background:var(--long-soft); border-color:var(--long)}
+  .riskchip.moderate{color:var(--text-dim); background:var(--surface-2); border-color:var(--line-strong)}
+  .riskchip.elevated{color:var(--accent); background:var(--accent-soft); border-color:var(--accent-line)}
+  .riskchip.high{color:var(--short); background:var(--short-soft); border-color:var(--short)}
+  .sec-lead{margin-top:11px; padding-top:10px; border-top:1px dashed var(--line); display:flex; align-items:center; justify-content:space-between; gap:8px}
+  .sec-lead .ll{font-family:var(--mono); font-size:10px; letter-spacing:.06em; text-transform:uppercase; color:var(--text-faint)}
+  .sec-lead .lv{font-family:var(--disp); font-weight:700; font-size:13px; display:flex; align-items:center; gap:6px}
+  .sec-lead .lg{font-family:var(--mono); font-size:10px; font-weight:600; border-radius:4px; padding:1px 5px; border:1px solid var(--line)}
+  .sec-lead .lg.ap{color:var(--accent); border-color:var(--accent-line); background:var(--accent-soft)}
+  .arrow.bull{color:var(--long)} .arrow.bear{color:var(--short)}
+
+  /* ---------- news rail ---------- */
+  .newspanel{background:var(--panel); border:1px solid var(--line); border-radius:16px; box-shadow:var(--shadow); overflow:hidden}
+  .news-list{max-height:340px; overflow-y:auto}
+  .nrow{display:grid; grid-template-columns:96px 1fr auto; gap:14px; align-items:baseline; padding:12px 18px; border-top:1px solid var(--line)}
+  .nrow:first-child{border-top:0}
+  .nsrc{font-family:var(--mono); font-size:10px; font-weight:600; letter-spacing:.06em; text-transform:uppercase; color:var(--accent)}
+  .ntitle{font-size:14px; color:var(--text); text-decoration:none; line-height:1.4}
+  a.ntitle:hover{color:var(--accent); text-decoration:underline}
+  .ntime{font-family:var(--mono); font-size:11px; color:var(--text-faint); white-space:nowrap; font-variant-numeric:tabular-nums}
+  @media (max-width:560px){ .nrow{grid-template-columns:1fr auto; gap:4px 10px} .nsrc{grid-column:1} .ntime{grid-column:2; grid-row:1} .ntitle{grid-column:1 / span 2} }
+  .news-empty{padding:22px 18px; color:var(--text-dim); font-size:14px}
+
   /* ---------- educational section shell (reused) ---------- */
   .divider{height:1px; background:var(--line); max-width:var(--maxw); margin:44px auto 0}
   section.edu{padding:60px 0}
@@ -358,6 +409,8 @@
     </div>
     <div class="navlinks">
       <a href="#ops">Live</a>
+      <a href="#sectors">Sectors</a>
+      <a href="#news">News</a>
       <a href="#lifecycle">Lifecycle</a>
       <a href="#structure">Market structure</a>
       <a href="#lab">Spread lab</a>
@@ -423,6 +476,35 @@
         </div>
       </div>
     </div>
+  </div>
+</section>
+
+<!-- ============ SECTOR MAP ============ -->
+<section class="ops band" id="sectors">
+  <div class="wrap">
+    <div class="band-h">
+      <span class="eyebrow">Sector map</span>
+      <h2>Where the money is moving.</h2>
+      <span class="meta" id="secMeta">—</span>
+      <div class="legend">
+        <i><span class="sw" style="background:var(--long)"></span> up vs 20-day EMA</i>
+        <i><span class="sw" style="background:var(--short)"></span> down</i>
+        <i>ATR% = volatility · RSI = momentum</i>
+      </div>
+    </div>
+    <div class="secgrid" id="secGrid"></div>
+  </div>
+</section>
+
+<!-- ============ NEWS RAIL ============ -->
+<section class="ops band" id="news">
+  <div class="wrap">
+    <div class="band-h">
+      <span class="eyebrow">Newswire</span>
+      <h2>Headlines, as they break.</h2>
+      <span class="meta" id="newsMeta">—</span>
+    </div>
+    <div class="newspanel"><div class="news-list" id="newsList"></div></div>
   </div>
 </section>
 
@@ -623,7 +705,7 @@
 
 <script id="snapshot" type="application/json">
 {
-  "generated_at": "2026-09-05T16:09:16+00:00",
+  "generated_at": "2026-09-05T16:48:08+00:00",
   "stale_minutes": 45,
   "market_date": "2026-09-04",
   "account": {
@@ -1135,7 +1217,349 @@
       "gates": "22/23",
       "ts": "2026-08-18T16:11:37"
     }
-  ]
+  ],
+  "sectors": [
+    {
+      "name": "Energy",
+      "etf": "XLE",
+      "price": 64.07,
+      "momentum": 2.27,
+      "mom20": 11.41,
+      "atr_pct": 1.76,
+      "risk": "Moderate",
+      "rsi": 60.0,
+      "structure": "Uptrend",
+      "above_ema20": true,
+      "leader": {
+        "symbol": "ARRY",
+        "dir": "bearish",
+        "grade": "B",
+        "conv": 9,
+        "dp": "none"
+      },
+      "tilt": {
+        "bull": 8,
+        "bear": 5,
+        "lean": "bullish",
+        "count": 13
+      }
+    },
+    {
+      "name": "Biotech",
+      "etf": "IBB",
+      "price": 212.02,
+      "momentum": 1.87,
+      "mom20": 7.19,
+      "atr_pct": 2.15,
+      "risk": "Moderate",
+      "rsi": 61.6,
+      "structure": "Uptrend",
+      "above_ema20": true,
+      "leader": {
+        "symbol": "BMY",
+        "dir": "bullish",
+        "grade": "B",
+        "conv": 9,
+        "dp": "accum"
+      },
+      "tilt": {
+        "bull": 7,
+        "bear": 0,
+        "lean": "bullish",
+        "count": 7
+      }
+    },
+    {
+      "name": "Technology",
+      "etf": "XLK",
+      "price": 187.36,
+      "momentum": 1.45,
+      "mom20": -0.37,
+      "atr_pct": 1.8,
+      "risk": "Moderate",
+      "rsi": 44.9,
+      "structure": "Uptrend",
+      "above_ema20": true,
+      "leader": {
+        "symbol": "CRWD",
+        "dir": "bullish",
+        "grade": "B",
+        "conv": 9,
+        "dp": "accum"
+      },
+      "tilt": {
+        "bull": 3,
+        "bear": 2,
+        "lean": "bullish",
+        "count": 5
+      }
+    },
+    {
+      "name": "Semiconductors",
+      "etf": "SMH",
+      "price": 567.4,
+      "momentum": 1.05,
+      "mom20": -2.69,
+      "atr_pct": 2.72,
+      "risk": "Elevated",
+      "rsi": 39.9,
+      "structure": "Rising",
+      "above_ema20": true,
+      "leader": {
+        "symbol": "NVDA",
+        "dir": "bullish",
+        "grade": "A",
+        "conv": 10,
+        "dp": "accum"
+      },
+      "tilt": {
+        "bull": 8,
+        "bear": 0,
+        "lean": "bullish",
+        "count": 8
+      }
+    },
+    {
+      "name": "Financials",
+      "etf": "XLF",
+      "price": 58.09,
+      "momentum": 0.55,
+      "mom20": 0.87,
+      "atr_pct": 1.15,
+      "risk": "Low",
+      "rsi": 54.4,
+      "structure": "Uptrend",
+      "above_ema20": true,
+      "leader": {
+        "symbol": "JPM",
+        "dir": "bullish",
+        "grade": "A+",
+        "conv": 12,
+        "dp": "accum"
+      },
+      "tilt": {
+        "bull": 9,
+        "bear": 0,
+        "lean": "bullish",
+        "count": 9
+      }
+    },
+    {
+      "name": "Health Care",
+      "etf": "XLV",
+      "price": 171.43,
+      "momentum": 0.4,
+      "mom20": 3.48,
+      "atr_pct": 1.59,
+      "risk": "Moderate",
+      "rsi": 59.1,
+      "structure": "Uptrend",
+      "above_ema20": true,
+      "leader": {
+        "symbol": "HIMS",
+        "dir": "bearish",
+        "grade": "A",
+        "conv": 10,
+        "dp": "distrib"
+      },
+      "tilt": {
+        "bull": 3,
+        "bear": 2,
+        "lean": "bullish",
+        "count": 5
+      }
+    },
+    {
+      "name": "Communications",
+      "etf": "XLC",
+      "price": 112.09,
+      "momentum": 0.31,
+      "mom20": 0.7,
+      "atr_pct": 1.36,
+      "risk": "Moderate",
+      "rsi": 54.4,
+      "structure": "Uptrend",
+      "above_ema20": true,
+      "leader": null,
+      "tilt": {
+        "bull": 0,
+        "bear": 0,
+        "lean": "\u2014",
+        "count": 0
+      }
+    },
+    {
+      "name": "Materials",
+      "etf": "XLB",
+      "price": 52.5,
+      "momentum": -0.28,
+      "mom20": -0.79,
+      "atr_pct": 1.67,
+      "risk": "Moderate",
+      "rsi": 51.8,
+      "structure": "Pulling back",
+      "above_ema20": false,
+      "leader": {
+        "symbol": "ALB",
+        "dir": "bearish",
+        "grade": "B",
+        "conv": 8,
+        "dp": "none"
+      },
+      "tilt": {
+        "bull": 0,
+        "bear": 1,
+        "lean": "bearish",
+        "count": 1
+      }
+    },
+    {
+      "name": "Utilities",
+      "etf": "XLU",
+      "price": 43.01,
+      "momentum": -0.76,
+      "mom20": -1.22,
+      "atr_pct": 1.46,
+      "risk": "Moderate",
+      "rsi": 37.1,
+      "structure": "Downtrend",
+      "above_ema20": false,
+      "leader": null,
+      "tilt": {
+        "bull": 0,
+        "bear": 0,
+        "lean": "\u2014",
+        "count": 0
+      }
+    },
+    {
+      "name": "Consumer Staples",
+      "etf": "XLP",
+      "price": 84.61,
+      "momentum": -0.96,
+      "mom20": -0.63,
+      "atr_pct": 1.24,
+      "risk": "Low",
+      "rsi": 49.5,
+      "structure": "Downtrend",
+      "above_ema20": false,
+      "leader": {
+        "symbol": "PEP",
+        "dir": "bearish",
+        "grade": "A",
+        "conv": 10,
+        "dp": "accum"
+      },
+      "tilt": {
+        "bull": 0,
+        "bear": 3,
+        "lean": "bearish",
+        "count": 3
+      }
+    },
+    {
+      "name": "Consumer Disc.",
+      "etf": "XLY",
+      "price": 114.92,
+      "momentum": -1.36,
+      "mom20": -4.13,
+      "atr_pct": 1.38,
+      "risk": "Moderate",
+      "rsi": 44.2,
+      "structure": "Downtrend",
+      "above_ema20": false,
+      "leader": {
+        "symbol": "RDDT",
+        "dir": "bearish",
+        "grade": "A",
+        "conv": 10,
+        "dp": "distrib"
+      },
+      "tilt": {
+        "bull": 0,
+        "bear": 4,
+        "lean": "bearish",
+        "count": 4
+      }
+    },
+    {
+      "name": "Real Estate",
+      "etf": "XLRE",
+      "price": 43.91,
+      "momentum": -1.48,
+      "mom20": -2.33,
+      "atr_pct": 1.05,
+      "risk": "Low",
+      "rsi": 36.8,
+      "structure": "Downtrend",
+      "above_ema20": false,
+      "leader": {
+        "symbol": "APLE",
+        "dir": "bearish",
+        "grade": "B",
+        "conv": 9,
+        "dp": "none"
+      },
+      "tilt": {
+        "bull": 0,
+        "bear": 1,
+        "lean": "bearish",
+        "count": 1
+      }
+    },
+    {
+      "name": "Industrials",
+      "etf": "XLI",
+      "price": 175.24,
+      "momentum": -1.84,
+      "mom20": -5.35,
+      "atr_pct": 1.37,
+      "risk": "Moderate",
+      "rsi": 23.7,
+      "structure": "Downtrend",
+      "above_ema20": false,
+      "leader": {
+        "symbol": "NOC",
+        "dir": "bearish",
+        "grade": "A",
+        "conv": 10,
+        "dp": "distrib"
+      },
+      "tilt": {
+        "bull": 0,
+        "bear": 8,
+        "lean": "bearish",
+        "count": 8
+      }
+    },
+    {
+      "name": "Homebuilders",
+      "etf": "ITB",
+      "price": 94.01,
+      "momentum": -2.1,
+      "mom20": -7.15,
+      "atr_pct": 2.22,
+      "risk": "Elevated",
+      "rsi": 38.7,
+      "structure": "Downtrend",
+      "above_ema20": false,
+      "leader": {
+        "symbol": "DHI",
+        "dir": "bearish",
+        "grade": "B",
+        "conv": 8,
+        "dp": "accum"
+      },
+      "tilt": {
+        "bull": 0,
+        "bear": 2,
+        "lean": "bearish",
+        "count": 2
+      }
+    }
+  ],
+  "sector_asof": "2026-09-05T12:19:49-04:00",
+  "news": []
 }
 </script>
 
@@ -1253,7 +1677,46 @@
         '<span class="rst">'+esc(r.status)+' · '+esc((r.exit||'').slice(5))+'</span></div>';
     }).join('');
   }
-  renderBoard(); renderRegime(); renderTiles(); renderPositions(); renderGates(); renderRecent();
+  function renderSectors(){
+    var el=document.getElementById('secGrid'); if(!el) return;
+    var secs=SNAP.sectors||[];
+    el.innerHTML=secs.map(function(s){
+      var mom=+s.momentum||0, up=mom>=0, risk=(s.risk||'').toLowerCase();
+      var pct=Math.min(50,Math.abs(mom)/6*50);   // 6% move = full half-bar
+      var fill=up?('left:50%;width:'+pct+'%'):('right:50%;width:'+pct+'%');
+      var ld=s.leader;
+      var lead=ld
+        ? '<div class="lv">'+esc(ld.symbol)+' <span class="arrow '+(ld.dir==='bullish'?'bull':'bear')+'">'+(ld.dir==='bullish'?'▲':'▼')+'</span> <span class="lg '+((ld.grade||'').toUpperCase()==='A+'?'ap':'')+'">'+esc(ld.grade)+'</span></div>'
+        : '<div class="lv" style="color:var(--text-faint);font-weight:500;font-size:12px">no A/B setup</div>';
+      return '<div class="sec '+(up?'pos':'neg')+'"><div class="stripe"></div>'+
+        '<div class="sec-top"><div><div class="sec-name">'+esc(s.name)+'</div>'+
+          '<div class="sec-etf">'+esc(s.etf)+' · '+esc(s.structure)+'</div></div>'+
+          '<div class="sec-mom '+(up?'up':'down')+'">'+(up?'+':'')+mom.toFixed(2)+'%<small>vs EMA20</small></div></div>'+
+        '<div class="sec-bar"><div class="zero"></div><div class="fill '+(up?'up':'down')+'" style="'+fill+'"></div></div>'+
+        '<div class="sec-meta">'+
+          '<span class="riskchip '+risk+'">'+esc(s.risk)+' vol</span>'+
+          '<span class="mchip">ATR <b>'+esc(s.atr_pct)+'%</b></span>'+
+          '<span class="mchip">RSI <b>'+esc(s.rsi)+'</b></span>'+
+          '<span class="mchip">20d <b>'+((s.mom20||0)>=0?'+':'')+esc(s.mom20)+'%</b></span>'+
+        '</div>'+
+        '<div class="sec-lead"><span class="ll">leader</span>'+lead+'</div></div>';
+    }).join('');
+    var meta=document.getElementById('secMeta');
+    if(meta) meta.textContent=secs.length+' sectors · volatility as of '+(SNAP.sector_asof?agoText(SNAP.sector_asof):'—');
+  }
+  function renderNews(){
+    var el=document.getElementById('newsList'); if(!el) return;
+    var news=SNAP.news||[], meta=document.getElementById('newsMeta');
+    if(!news.length){ el.innerHTML='<div class="news-empty">Headlines refresh each cycle — none loaded right now.</div>'; if(meta) meta.textContent=''; return; }
+    el.innerHTML=news.map(function(n){
+      var t=n.time?agoText(n.time):'';
+      var title=n.link?('<a class="ntitle" href="'+esc(n.link)+'" target="_blank" rel="noopener">'+esc(n.title)+'</a>')
+                       :('<span class="ntitle">'+esc(n.title)+'</span>');
+      return '<div class="nrow"><span class="nsrc">'+esc(n.source)+'</span>'+title+'<span class="ntime">'+esc(t)+'</span></div>';
+    }).join('');
+    if(meta) meta.textContent=news.length+' latest';
+  }
+  renderBoard(); renderRegime(); renderTiles(); renderPositions(); renderGates(); renderRecent(); renderSectors(); renderNews();
 
   /* ---------- LIVE vs DEMO mode ---------- */
   var ribbon=document.getElementById('ribbon'),
