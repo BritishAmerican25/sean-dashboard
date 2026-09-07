@@ -482,6 +482,7 @@
       <a href="#structure">Market structure</a>
       <a href="#lab">Spread lab</a>
       <a href="#membership">Membership</a>
+      <a id="loginLink" href="#" target="_blank" rel="noopener" hidden>Log in</a>
       <a class="wl-nav" href="#waitlist">Join waitlist</a>
       <button class="ttoggle" id="themeBtn" aria-label="Toggle color theme"><span id="themeIcon">◐</span></button>
     </div>
@@ -815,7 +816,7 @@
           <li>Build-in-public dev updates + roadmap</li>
           <li>Early access to new features</li>
         </ul>
-        <a class="tcta primary" href="#waitlist">Join the founding list</a>
+        <a class="tcta primary js-join" href="#waitlist">Join the founding list</a>
       </div>
     </div>
 
@@ -873,7 +874,7 @@
 
 <script id="snapshot" type="application/json">
 {
-  "generated_at": "2026-09-05T17:59:56+00:00",
+  "generated_at": "2026-09-07T12:32:44+00:00",
   "stale_minutes": 45,
   "market_date": "2026-09-04",
   "account": {
@@ -2106,6 +2107,21 @@
           })
           .finally(function(){ if(btn){ btn.disabled=false; btn.textContent=orig; } });
       });
+    });
+  })();
+
+  /* ---------- community login wiring (swap-ready) ---------- */
+  (function(){
+    // Paste your community base URL here when it's live (Skool/Whop/Circle),
+    // e.g. "https://www.skool.com/your-community". The page then reveals a
+    // "Log in" link and points the Member "Join" button at it. Real accounts,
+    // passwords and payments are handled by that platform — not this static page.
+    var COMMUNITY_URL = "";
+    if(!COMMUNITY_URL) return;
+    var login = document.getElementById('loginLink');
+    if(login){ login.href = COMMUNITY_URL; login.hidden = false; }
+    Array.prototype.forEach.call(document.querySelectorAll('.js-join'), function(a){
+      a.href = COMMUNITY_URL; a.target = "_blank"; a.rel = "noopener";
     });
   })();
 })();
