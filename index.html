@@ -884,7 +884,7 @@
 
 <script id="snapshot" type="application/json">
 {
-  "generated_at": "2026-09-07T14:19:25+00:00",
+  "generated_at": "2026-09-07T14:22:00+00:00",
   "stale_minutes": 45,
   "market_date": "2026-09-04",
   "account": {
@@ -1737,9 +1737,35 @@
       }
     }
   ],
-  "sector_asof": "2026-09-05T12:19:49-04:00",
+  "sector_asof": "2026-09-07T10:20:11-04:00",
   "news": [],
-  "futures": [],
+  "futures": [
+    {
+      "sym": "NQ",
+      "name": "Nasdaq-100",
+      "price": 29565.25,
+      "pct": 1.51
+    },
+    {
+      "sym": "ES",
+      "name": "S&P 500",
+      "price": 7722.0,
+      "pct": 1.04
+    },
+    {
+      "sym": "RTY",
+      "name": "Russell 2000",
+      "price": 2976.6,
+      "pct": 1.77
+    },
+    {
+      "sym": "YM",
+      "name": "Dow 30",
+      "price": 53440.0,
+      "pct": 1.16
+    }
+  ],
+  "futures_asof": "2026-09-07T10:20:11-04:00",
   "futures_session": "regular hours"
 }
 </script>
@@ -1907,8 +1933,9 @@
       return '<span class="fut"><b>'+esc(x.sym)+'</b><span class="'+(up?'fu':'fd')+'">'+(up?'▲':'▼')+' '+(up?'+':'')+(+x.pct).toFixed(2)+'%</span></span>';
     }).join('');
     var sess=SNAP.futures_session?(' · '+esc(SNAP.futures_session)):'';
+    var asof=SNAP.futures_asof||SNAP.generated_at;
     el.innerHTML='<span class="futlabel">Index futures</span>'+items+
-      '<span class="futstamp">snapshot '+(SNAP.generated_at?agoText(SNAP.generated_at):'')+sess+'</span>';
+      '<span class="futstamp">as of '+(asof?agoText(asof):'—')+sess+'</span>';
   }
   renderBoard(); renderRegime(); renderTiles(); renderPositions(); renderGates(); renderRecent(); renderSectors(); renderNews(); renderFutures();
 
