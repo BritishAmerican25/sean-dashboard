@@ -99,6 +99,15 @@
   .ttoggle:hover{color:var(--text); border-color:var(--line-strong)}
   .ttoggle:focus-visible, .navlinks a:focus-visible{outline:2px solid var(--accent-line); outline-offset:2px}
 
+  /* ---------- index-futures ribbon ---------- */
+  .futstrip{display:flex; align-items:center; gap:20px; flex-wrap:nowrap; overflow-x:auto; padding:11px 16px; margin-bottom:18px;
+    background:var(--panel); border:1px solid var(--line); border-radius:12px; box-shadow:var(--shadow)}
+  .futstrip .futlabel{font-family:var(--mono); font-size:10.5px; letter-spacing:.08em; text-transform:uppercase; color:var(--text-faint); white-space:nowrap}
+  .futstrip .fut{font-family:var(--mono); font-size:13px; color:var(--text-dim); white-space:nowrap; font-variant-numeric:tabular-nums}
+  .futstrip .fut b{color:var(--text); font-weight:600; margin-right:5px}
+  .futstrip .fut .fu{color:var(--long); font-weight:600} .futstrip .fut .fd{color:var(--short); font-weight:600}
+  .futstrip .futstamp{margin-left:auto; padding-left:14px; font-family:var(--mono); font-size:10.5px; color:var(--text-faint); white-space:nowrap}
+
   /* ---------- marketing hero + waitlist ---------- */
   .wl-nav{font-family:var(--mono); font-size:12px; text-decoration:none; color:#1c1503 !important;
     background:var(--accent-line); border-radius:8px; padding:6px 12px; font-weight:600; white-space:nowrap}
@@ -511,6 +520,7 @@
 <section class="ops" id="ops">
   <div class="ops-grid" aria-hidden="true"></div>
   <div class="wrap ops-inner">
+    <div class="futstrip" id="futStrip" hidden></div>
     <div class="proof-label"><span class="eyebrow">● Live proof</span><span class="rule"></span></div>
     <div class="ops-title">
       <h1>Operations</h1>
@@ -874,7 +884,7 @@
 
 <script id="snapshot" type="application/json">
 {
-  "generated_at": "2026-09-07T13:27:36+00:00",
+  "generated_at": "2026-09-07T14:15:13+00:00",
   "stale_minutes": 45,
   "market_date": "2026-09-04",
   "account": {
@@ -1728,7 +1738,9 @@
     }
   ],
   "sector_asof": "2026-09-05T12:19:49-04:00",
-  "news": []
+  "news": [],
+  "futures": [],
+  "futures_session": "regular hours"
 }
 </script>
 
@@ -1885,7 +1897,20 @@
     }).join('');
     if(meta) meta.textContent=news.length+' latest';
   }
-  renderBoard(); renderRegime(); renderTiles(); renderPositions(); renderGates(); renderRecent(); renderSectors(); renderNews();
+  function renderFutures(){
+    var el=document.getElementById('futStrip'); if(!el) return;
+    var f=SNAP.futures||[];
+    if(!f.length){ el.hidden=true; return; }
+    el.hidden=false;
+    var items=f.map(function(x){
+      var up=(x.pct||0)>=0;
+      return '<span class="fut"><b>'+esc(x.sym)+'</b><span class="'+(up?'fu':'fd')+'">'+(up?'▲':'▼')+' '+(up?'+':'')+(+x.pct).toFixed(2)+'%</span></span>';
+    }).join('');
+    var sess=SNAP.futures_session?(' · '+esc(SNAP.futures_session)):'';
+    el.innerHTML='<span class="futlabel">Index futures</span>'+items+
+      '<span class="futstamp">snapshot '+(SNAP.generated_at?agoText(SNAP.generated_at):'')+sess+'</span>';
+  }
+  renderBoard(); renderRegime(); renderTiles(); renderPositions(); renderGates(); renderRecent(); renderSectors(); renderNews(); renderFutures();
 
   /* ---------- LIVE vs DEMO mode ---------- */
   var ribbon=document.getElementById('ribbon'),
