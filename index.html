@@ -884,7 +884,7 @@
 
 <script id="snapshot" type="application/json">
 {
-  "generated_at": "2026-09-07T14:22:00+00:00",
+  "generated_at": "2026-09-07T14:37:16+00:00",
   "stale_minutes": 45,
   "market_date": "2026-09-04",
   "account": {
@@ -1737,7 +1737,7 @@
       }
     }
   ],
-  "sector_asof": "2026-09-07T10:20:11-04:00",
+  "sector_asof": "2026-09-07T10:34:52-04:00",
   "news": [],
   "futures": [
     {
@@ -1763,9 +1763,27 @@
       "name": "Dow 30",
       "price": 53440.0,
       "pct": 1.16
+    },
+    {
+      "sym": "GOLD",
+      "name": "Gold",
+      "price": 4476.6,
+      "pct": 2.96
+    },
+    {
+      "sym": "SILVER",
+      "name": "Silver",
+      "price": 66.75,
+      "pct": 3.3
+    },
+    {
+      "sym": "OIL",
+      "name": "WTI Crude",
+      "price": 91.48,
+      "pct": 1.4
     }
   ],
-  "futures_asof": "2026-09-07T10:20:11-04:00",
+  "futures_asof": "2026-09-07T10:34:52-04:00",
   "futures_session": "regular hours"
 }
 </script>
@@ -1934,7 +1952,7 @@
     }).join('');
     var sess=SNAP.futures_session?(' · '+esc(SNAP.futures_session)):'';
     var asof=SNAP.futures_asof||SNAP.generated_at;
-    el.innerHTML='<span class="futlabel">Index futures</span>'+items+
+    el.innerHTML='<span class="futlabel">Futures</span>'+items+
       '<span class="futstamp">as of '+(asof?agoText(asof):'—')+sess+'</span>';
   }
   renderBoard(); renderRegime(); renderTiles(); renderPositions(); renderGates(); renderRecent(); renderSectors(); renderNews(); renderFutures();
