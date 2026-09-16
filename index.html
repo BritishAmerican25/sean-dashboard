@@ -885,7 +885,7 @@
 
 <script id="snapshot" type="application/json">
 {
-  "generated_at": "2026-09-16T14:10:58+00:00",
+  "generated_at": "2026-09-16T15:03:07+00:00",
   "stale_minutes": 45,
   "market_date": "2026-09-15",
   "account": {
@@ -899,18 +899,17 @@
     "halted": false
   },
   "regime": {
-    "name": "volatile_bearish",
-    "score": -3,
-    "sizing": 0.75,
-    "desc": "Volatile Bear \u2014 mixed signals, net negative bias",
+    "name": "choppy",
+    "score": 1,
+    "sizing": 0.5,
+    "desc": "Choppy \u2014 no clear direction, A+ setups only",
     "vix": 16.99,
-    "spy": null,
+    "spy": 760.2,
     "rate_regime": "very_restrictive",
     "allowed_strategies": [
-      "smc_swing",
-      "liquidity_sweep_reversal"
+      "smc_swing"
     ],
-    "breadth_pct": 0.118
+    "breadth_pct": 0.176
   },
   "board": [
     {
@@ -1406,10 +1405,29 @@
   ],
   "sectors": [
     {
+      "name": "Communications",
+      "etf": "XLC",
+      "price": 114.36,
+      "momentum": 1.73,
+      "mom20": 2.9,
+      "atr_pct": 1.44,
+      "risk": "Moderate",
+      "rsi": 52.7,
+      "structure": "Uptrend",
+      "above_ema20": true,
+      "leader": null,
+      "tilt": {
+        "bull": 0,
+        "bear": 0,
+        "lean": "\u2014",
+        "count": 0
+      }
+    },
+    {
       "name": "Energy",
       "etf": "XLE",
-      "price": 65.93,
-      "momentum": 3.31,
+      "price": 64.71,
+      "momentum": 1.25,
       "mom20": 5.35,
       "atr_pct": 1.97,
       "risk": "Moderate",
@@ -1431,29 +1449,35 @@
       }
     },
     {
-      "name": "Communications",
-      "etf": "XLC",
-      "price": 114.03,
-      "momentum": 1.61,
-      "mom20": 2.9,
-      "atr_pct": 1.44,
+      "name": "Technology",
+      "etf": "XLK",
+      "price": 185.74,
+      "momentum": 0.31,
+      "mom20": -3.46,
+      "atr_pct": 1.64,
       "risk": "Moderate",
-      "rsi": 52.7,
+      "rsi": 53.7,
       "structure": "Uptrend",
       "above_ema20": true,
-      "leader": null,
+      "leader": {
+        "symbol": "CRWD",
+        "dir": "bullish",
+        "grade": "A+",
+        "conv": 11,
+        "dp": "accum"
+      },
       "tilt": {
-        "bull": 0,
-        "bear": 0,
-        "lean": "\u2014",
-        "count": 0
+        "bull": 12,
+        "bear": 9,
+        "lean": "bullish",
+        "count": 21
       }
     },
     {
       "name": "Health Care",
       "etf": "XLV",
-      "price": 167.66,
-      "momentum": -0.73,
+      "price": 168.06,
+      "momentum": -0.45,
       "mom20": 0.37,
       "atr_pct": 1.37,
       "risk": "Moderate",
@@ -1475,60 +1499,10 @@
       }
     },
     {
-      "name": "Technology",
-      "etf": "XLK",
-      "price": 183.74,
-      "momentum": -0.74,
-      "mom20": -3.46,
-      "atr_pct": 1.64,
-      "risk": "Moderate",
-      "rsi": 53.7,
-      "structure": "Pulling back",
-      "above_ema20": false,
-      "leader": {
-        "symbol": "CRWD",
-        "dir": "bullish",
-        "grade": "A+",
-        "conv": 11,
-        "dp": "accum"
-      },
-      "tilt": {
-        "bull": 12,
-        "bear": 9,
-        "lean": "bullish",
-        "count": 21
-      }
-    },
-    {
-      "name": "Financials",
-      "etf": "XLF",
-      "price": 56.85,
-      "momentum": -1.03,
-      "mom20": -1.27,
-      "atr_pct": 1.17,
-      "risk": "Low",
-      "rsi": 36.4,
-      "structure": "Downtrend",
-      "above_ema20": false,
-      "leader": {
-        "symbol": "MS",
-        "dir": "bearish",
-        "grade": "B",
-        "conv": 9,
-        "dp": "none"
-      },
-      "tilt": {
-        "bull": 2,
-        "bear": 6,
-        "lean": "bearish",
-        "count": 8
-      }
-    },
-    {
       "name": "Consumer Staples",
       "etf": "XLP",
-      "price": 83.73,
-      "momentum": -1.06,
+      "price": 83.72,
+      "momentum": -0.97,
       "mom20": -1.12,
       "atr_pct": 1.05,
       "risk": "Low",
@@ -1550,35 +1524,10 @@
       }
     },
     {
-      "name": "Biotech",
-      "etf": "IBB",
-      "price": 202.0,
-      "momentum": -2.0,
-      "mom20": 0.03,
-      "atr_pct": 1.8,
-      "risk": "Moderate",
-      "rsi": 24.3,
-      "structure": "Pulling back",
-      "above_ema20": false,
-      "leader": {
-        "symbol": "ILMN",
-        "dir": "bullish",
-        "grade": "A+",
-        "conv": 12,
-        "dp": "accum"
-      },
-      "tilt": {
-        "bull": 2,
-        "bear": 6,
-        "lean": "bearish",
-        "count": 8
-      }
-    },
-    {
       "name": "Real Estate",
       "etf": "XLRE",
-      "price": 43.07,
-      "momentum": -2.14,
+      "price": 43.46,
+      "momentum": -1.11,
       "mom20": -3.93,
       "atr_pct": 1.21,
       "risk": "Low",
@@ -1600,35 +1549,10 @@
       }
     },
     {
-      "name": "Materials",
-      "etf": "XLB",
-      "price": 50.73,
-      "momentum": -2.2,
-      "mom20": -2.89,
-      "atr_pct": 1.44,
-      "risk": "Moderate",
-      "rsi": 24.8,
-      "structure": "Downtrend",
-      "above_ema20": false,
-      "leader": {
-        "symbol": "ALB",
-        "dir": "bearish",
-        "grade": "B",
-        "conv": 9,
-        "dp": "none"
-      },
-      "tilt": {
-        "bull": 0,
-        "bear": 2,
-        "lean": "bearish",
-        "count": 2
-      }
-    },
-    {
       "name": "Semiconductors",
       "etf": "SMH",
-      "price": 542.11,
-      "momentum": -3.08,
+      "price": 551.61,
+      "momentum": -1.25,
       "mom20": -8.75,
       "atr_pct": 2.62,
       "risk": "Elevated",
@@ -1650,10 +1574,104 @@
       }
     },
     {
+      "name": "Biotech",
+      "etf": "IBB",
+      "price": 203.07,
+      "momentum": -1.34,
+      "mom20": 0.03,
+      "atr_pct": 1.8,
+      "risk": "Moderate",
+      "rsi": 24.3,
+      "structure": "Pulling back",
+      "above_ema20": false,
+      "leader": {
+        "symbol": "ILMN",
+        "dir": "bullish",
+        "grade": "A+",
+        "conv": 12,
+        "dp": "accum"
+      },
+      "tilt": {
+        "bull": 2,
+        "bear": 6,
+        "lean": "bearish",
+        "count": 8
+      }
+    },
+    {
+      "name": "Financials",
+      "etf": "XLF",
+      "price": 56.58,
+      "momentum": -1.36,
+      "mom20": -1.27,
+      "atr_pct": 1.17,
+      "risk": "Low",
+      "rsi": 36.4,
+      "structure": "Downtrend",
+      "above_ema20": false,
+      "leader": {
+        "symbol": "MS",
+        "dir": "bearish",
+        "grade": "B",
+        "conv": 9,
+        "dp": "none"
+      },
+      "tilt": {
+        "bull": 2,
+        "bear": 6,
+        "lean": "bearish",
+        "count": 8
+      }
+    },
+    {
+      "name": "Materials",
+      "etf": "XLB",
+      "price": 50.95,
+      "momentum": -1.6,
+      "mom20": -2.89,
+      "atr_pct": 1.44,
+      "risk": "Moderate",
+      "rsi": 24.8,
+      "structure": "Downtrend",
+      "above_ema20": false,
+      "leader": {
+        "symbol": "ALB",
+        "dir": "bearish",
+        "grade": "B",
+        "conv": 9,
+        "dp": "none"
+      },
+      "tilt": {
+        "bull": 0,
+        "bear": 2,
+        "lean": "bearish",
+        "count": 2
+      }
+    },
+    {
+      "name": "Utilities",
+      "etf": "XLU",
+      "price": 41.5,
+      "momentum": -2.88,
+      "mom20": -6.47,
+      "atr_pct": 1.55,
+      "risk": "Moderate",
+      "rsi": 29.4,
+      "structure": "Downtrend",
+      "above_ema20": false,
+      "leader": null,
+      "tilt": {
+        "bull": 0,
+        "bear": 0,
+        "lean": "\u2014",
+        "count": 0
+      }
+    },
+    {
       "name": "Consumer Disc.",
       "etf": "XLY",
-      "price": 110.88,
-      "momentum": -3.25,
+      "price": 110.93,
+      "momentum": -2.91,
       "mom20": -5.03,
       "atr_pct": 1.4,
       "risk": "Moderate",
@@ -1677,8 +1695,8 @@
     {
       "name": "Industrials",
       "etf": "XLI",
-      "price": 168.85,
-      "momentum": -3.56,
+      "price": 169.39,
+      "momentum": -2.95,
       "mom20": -9.38,
       "atr_pct": 1.45,
       "risk": "Moderate",
@@ -1700,29 +1718,10 @@
       }
     },
     {
-      "name": "Utilities",
-      "etf": "XLU",
-      "price": 41.32,
-      "momentum": -3.59,
-      "mom20": -6.47,
-      "atr_pct": 1.55,
-      "risk": "Moderate",
-      "rsi": 29.4,
-      "structure": "Downtrend",
-      "above_ema20": false,
-      "leader": null,
-      "tilt": {
-        "bull": 0,
-        "bear": 0,
-        "lean": "\u2014",
-        "count": 0
-      }
-    },
-    {
       "name": "Homebuilders",
       "etf": "ITB",
-      "price": 89.12,
-      "momentum": -4.25,
+      "price": 89.61,
+      "momentum": -3.39,
       "mom20": -8.91,
       "atr_pct": 2.19,
       "risk": "Moderate",
