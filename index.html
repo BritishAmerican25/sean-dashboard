@@ -885,9 +885,9 @@
 
 <script id="snapshot" type="application/json">
 {
-  "generated_at": "2026-09-29T12:31:27+00:00",
+  "generated_at": "2026-09-29T16:16:47+00:00",
   "stale_minutes": 45,
-  "market_date": "2026-09-28",
+  "market_date": "2026-09-29",
   "account": {
     "equity": 3759.3,
     "floor": 2800,
@@ -899,29 +899,41 @@
     "halted": false
   },
   "regime": {
-    "name": "volatile_bullish",
-    "score": 2,
-    "sizing": 0.75,
-    "desc": "Volatile Bull \u2014 mixed signals, net positive bias",
-    "vix": 16.25,
-    "spy": null,
+    "name": "choppy",
+    "score": 0,
+    "sizing": 0.5,
+    "desc": "Choppy \u2014 no clear direction, A+ setups only",
+    "vix": 16.09,
+    "spy": 763.14,
     "rate_regime": "very_restrictive",
     "allowed_strategies": [
-      "smc_swing",
-      "liquidity_sweep_reversal",
-      "dark_pool_conviction"
+      "smc_swing"
     ],
-    "breadth_pct": null
+    "breadth_pct": 0.294
   },
   "board": [
     {
-      "symbol": "ADSK",
+      "symbol": "HD",
+      "dir": "bearish",
+      "sector": "consumer_staples",
+      "grade": "A+",
+      "conv": 11,
+      "pincer": true,
+      "counter": false,
+      "layers": 6,
+      "dp": "distrib",
+      "strat": "2-2D",
+      "ftc": true,
+      "cmf": "bearish"
+    },
+    {
+      "symbol": "HONA",
       "dir": "bearish",
       "sector": "unknown",
       "grade": "A",
       "conv": 10,
       "pincer": false,
-      "counter": true,
+      "counter": false,
       "layers": 5,
       "dp": "distrib",
       "strat": "2-2D",
@@ -929,21 +941,35 @@
       "cmf": "bearish"
     },
     {
-      "symbol": "AXON",
+      "symbol": "BAC",
       "dir": "bearish",
-      "sector": "industrials",
+      "sector": "financials",
       "grade": "A",
       "conv": 10,
       "pincer": false,
       "counter": false,
       "layers": 6,
       "dp": "distrib",
-      "strat": "\u2014",
+      "strat": "2-2D",
+      "ftc": true,
+      "cmf": "bearish"
+    },
+    {
+      "symbol": "MCD",
+      "dir": "bearish",
+      "sector": "consumer_discretionary",
+      "grade": "A",
+      "conv": 10,
+      "pincer": false,
+      "counter": false,
+      "layers": 6,
+      "dp": "distrib",
+      "strat": "2-2D",
       "ftc": true,
       "cmf": "bearish"
     }
   ],
-  "board_count": 2,
+  "board_count": 4,
   "positions": [],
   "recent": [
     {
@@ -1101,89 +1127,114 @@
     {
       "name": "Semiconductors",
       "etf": "SMH",
-      "price": 600.52,
-      "momentum": 4.66,
-      "mom20": 8.05,
-      "atr_pct": 2.69,
+      "price": 609.0,
+      "momentum": 4.73,
+      "mom20": 8.48,
+      "atr_pct": 2.63,
       "risk": "Elevated",
-      "rsi": 66.7,
+      "rsi": 59.7,
       "structure": "Uptrend",
       "above_ema20": true,
       "leader": {
-        "symbol": "NVDA",
+        "symbol": "ADI",
+        "dir": "bullish",
+        "grade": "B",
+        "conv": 8,
+        "dp": "accum"
+      },
+      "tilt": {
+        "bull": 1,
+        "bear": 0,
+        "lean": "bullish",
+        "count": 1
+      }
+    },
+    {
+      "name": "Technology",
+      "etf": "XLK",
+      "price": 194.93,
+      "momentum": 2.32,
+      "mom20": 4.76,
+      "atr_pct": 1.66,
+      "risk": "Moderate",
+      "rsi": 62.6,
+      "structure": "Uptrend",
+      "above_ema20": true,
+      "leader": {
+        "symbol": "ARQQ",
         "dir": "bullish",
         "grade": "B",
         "conv": 9,
         "dp": "none"
       },
       "tilt": {
-        "bull": 2,
-        "bear": 0,
+        "bull": 8,
+        "bear": 3,
         "lean": "bullish",
-        "count": 2
+        "count": 11
       }
     },
     {
-      "name": "Technology",
-      "etf": "XLK",
-      "price": 194.71,
-      "momentum": 3.06,
-      "mom20": 6.49,
-      "atr_pct": 1.6,
+      "name": "Biotech",
+      "etf": "IBB",
+      "price": 208.83,
+      "momentum": 0.67,
+      "mom20": 0.84,
+      "atr_pct": 1.78,
       "risk": "Moderate",
-      "rsi": 67.5,
+      "rsi": 55.4,
       "structure": "Uptrend",
       "above_ema20": true,
       "leader": {
-        "symbol": "MDB",
-        "dir": "bearish",
+        "symbol": "AMGN",
+        "dir": "bullish",
         "grade": "B",
         "conv": 9,
         "dp": "none"
       },
       "tilt": {
         "bull": 1,
-        "bear": 8,
-        "lean": "bearish",
-        "count": 9
+        "bear": 1,
+        "lean": "mixed",
+        "count": 2
       }
     },
     {
-      "name": "Biotech",
-      "etf": "IBB",
-      "price": 209.25,
-      "momentum": 1.25,
-      "mom20": -2.78,
-      "atr_pct": 1.89,
-      "risk": "Moderate",
-      "rsi": 43.7,
+      "name": "Health Care",
+      "etf": "XLV",
+      "price": 169.42,
+      "momentum": 0.04,
+      "mom20": 0.06,
+      "atr_pct": 1.24,
+      "risk": "Low",
+      "rsi": 69.0,
       "structure": "Uptrend",
       "above_ema20": true,
       "leader": {
-        "symbol": "AMGN",
+        "symbol": "DHR",
         "dir": "bullish",
-        "grade": "A",
-        "conv": 10,
+        "grade": "B",
+        "conv": 9,
         "dp": "accum"
       },
       "tilt": {
-        "bull": 5,
+        "bull": 2,
         "bear": 1,
         "lean": "bullish",
-        "count": 6
+        "count": 3
       }
     },
     {
       "name": "Communications",
       "etf": "XLC",
-      "price": 113.99,
-      "momentum": 1.18,
-      "mom20": 1.23,
-      "atr_pct": 1.64,
+      "price": 110.7,
+      "momentum": -1.47,
+      "mom20": -1.6,
+      "atr_pct": 1.73,
       "risk": "Moderate",
-      "rsi": 51.6,
-      "structure": "Uptrend",
-      "above_ema20": true,
+      "rsi": 49.1,
+      "structure": "Downtrend",
+      "above_ema20": false,
       "leader": null,
       "tilt": {
         "bull": 0,
@@ -1193,47 +1244,47 @@
       }
     },
     {
-      "name": "Health Care",
-      "etf": "XLV",
-      "price": 169.87,
-      "momentum": 0.53,
-      "mom20": -2.11,
-      "atr_pct": 1.33,
+      "name": "Industrials",
+      "etf": "XLI",
+      "price": 168.56,
+      "momentum": -1.71,
+      "mom20": -4.72,
+      "atr_pct": 1.39,
       "risk": "Moderate",
-      "rsi": 39.1,
-      "structure": "Uptrend",
-      "above_ema20": true,
+      "rsi": 31.9,
+      "structure": "Downtrend",
+      "above_ema20": false,
       "leader": {
-        "symbol": "JNJ",
-        "dir": "bullish",
-        "grade": "B",
-        "conv": 9,
-        "dp": "none"
+        "symbol": "ACN",
+        "dir": "bearish",
+        "grade": "A",
+        "conv": 10,
+        "dp": "distrib"
       },
       "tilt": {
-        "bull": 3,
-        "bear": 0,
-        "lean": "bullish",
-        "count": 3
+        "bull": 1,
+        "bear": 10,
+        "lean": "bearish",
+        "count": 11
       }
     },
     {
-      "name": "Energy",
-      "etf": "XLE",
-      "price": 62.6,
-      "momentum": -1.25,
-      "mom20": 0.27,
-      "atr_pct": 2.2,
-      "risk": "Elevated",
-      "rsi": 40.2,
-      "structure": "Pulling back",
+      "name": "Consumer Staples",
+      "etf": "XLP",
+      "price": 81.38,
+      "momentum": -2.11,
+      "mom20": -3.71,
+      "atr_pct": 1.13,
+      "risk": "Low",
+      "rsi": 38.5,
+      "structure": "Downtrend",
       "above_ema20": false,
       "leader": {
-        "symbol": "RUN",
+        "symbol": "KHC",
         "dir": "bearish",
-        "grade": "B",
-        "conv": 9,
-        "dp": "none"
+        "grade": "A+",
+        "conv": 12,
+        "dp": "distrib"
       },
       "tilt": {
         "bull": 0,
@@ -1243,47 +1294,72 @@
       }
     },
     {
-      "name": "Industrials",
-      "etf": "XLI",
-      "price": 168.83,
-      "momentum": -2.03,
-      "mom20": -6.38,
-      "atr_pct": 1.32,
+      "name": "Energy",
+      "etf": "XLE",
+      "price": 61.6,
+      "momentum": -2.27,
+      "mom20": -0.93,
+      "atr_pct": 2.15,
       "risk": "Moderate",
-      "rsi": 29.4,
-      "structure": "Downtrend",
+      "rsi": 36.1,
+      "structure": "Pulling back",
       "above_ema20": false,
       "leader": {
-        "symbol": "ACN",
+        "symbol": "RIVN",
         "dir": "bearish",
         "grade": "A",
-        "conv": 11,
+        "conv": 12,
         "dp": "distrib"
       },
       "tilt": {
-        "bull": 1,
+        "bull": 0,
         "bear": 9,
         "lean": "bearish",
-        "count": 10
+        "count": 9
       }
     },
     {
-      "name": "Consumer Staples",
-      "etf": "XLP",
-      "price": 81.7,
-      "momentum": -2.24,
-      "mom20": -5.3,
-      "atr_pct": 1.12,
-      "risk": "Low",
-      "rsi": 28.4,
+      "name": "Homebuilders",
+      "etf": "ITB",
+      "price": 87.93,
+      "momentum": -2.59,
+      "mom20": -7.95,
+      "atr_pct": 2.31,
+      "risk": "Elevated",
+      "rsi": 42.9,
       "structure": "Downtrend",
       "above_ema20": false,
       "leader": {
-        "symbol": "KHC",
+        "symbol": "PHM",
+        "dir": "bearish",
+        "grade": "B",
+        "conv": 8,
+        "dp": "accum"
+      },
+      "tilt": {
+        "bull": 0,
+        "bear": 1,
+        "lean": "bearish",
+        "count": 1
+      }
+    },
+    {
+      "name": "Consumer Disc.",
+      "etf": "XLY",
+      "price": 108.82,
+      "momentum": -2.86,
+      "mom20": -7.0,
+      "atr_pct": 1.45,
+      "risk": "Moderate",
+      "rsi": 30.0,
+      "structure": "Downtrend",
+      "above_ema20": false,
+      "leader": {
+        "symbol": "MCD",
         "dir": "bearish",
         "grade": "A",
         "conv": 10,
-        "dp": "none"
+        "dp": "distrib"
       },
       "tilt": {
         "bull": 0,
@@ -1293,39 +1369,14 @@
       }
     },
     {
-      "name": "Consumer Disc.",
-      "etf": "XLY",
-      "price": 110.32,
-      "momentum": -2.27,
-      "mom20": -5.84,
-      "atr_pct": 1.45,
-      "risk": "Moderate",
-      "rsi": 26.7,
-      "structure": "Downtrend",
-      "above_ema20": false,
-      "leader": {
-        "symbol": "CELH",
-        "dir": "bearish",
-        "grade": "B",
-        "conv": 9,
-        "dp": "none"
-      },
-      "tilt": {
-        "bull": 0,
-        "bear": 8,
-        "lean": "bearish",
-        "count": 8
-      }
-    },
-    {
       "name": "Materials",
       "etf": "XLB",
-      "price": 49.68,
-      "momentum": -2.61,
-      "mom20": -7.43,
-      "atr_pct": 1.41,
+      "price": 48.99,
+      "momentum": -3.14,
+      "mom20": -6.98,
+      "atr_pct": 1.42,
       "risk": "Moderate",
-      "rsi": 26.1,
+      "rsi": 29.1,
       "structure": "Downtrend",
       "above_ema20": false,
       "leader": {
@@ -1333,50 +1384,6 @@
         "dir": "bearish",
         "grade": "B",
         "conv": 9,
-        "dp": "none"
-      },
-      "tilt": {
-        "bull": 0,
-        "bear": 3,
-        "lean": "bearish",
-        "count": 3
-      }
-    },
-    {
-      "name": "Homebuilders",
-      "etf": "ITB",
-      "price": 88.31,
-      "momentum": -2.85,
-      "mom20": -9.25,
-      "atr_pct": 2.39,
-      "risk": "Elevated",
-      "rsi": 35.0,
-      "structure": "Downtrend",
-      "above_ema20": false,
-      "leader": null,
-      "tilt": {
-        "bull": 0,
-        "bear": 0,
-        "lean": "\u2014",
-        "count": 0
-      }
-    },
-    {
-      "name": "Financials",
-      "etf": "XLF",
-      "price": 54.53,
-      "momentum": -3.18,
-      "mom20": -6.4,
-      "atr_pct": 1.38,
-      "risk": "Moderate",
-      "rsi": 8.6,
-      "structure": "Downtrend",
-      "above_ema20": false,
-      "leader": {
-        "symbol": "SPGI",
-        "dir": "bearish",
-        "grade": "B",
-        "conv": 8,
         "dp": "none"
       },
       "tilt": {
@@ -1389,12 +1396,12 @@
     {
       "name": "Real Estate",
       "etf": "XLRE",
-      "price": 41.65,
-      "momentum": -3.5,
-      "mom20": -7.63,
+      "price": 41.19,
+      "momentum": -3.51,
+      "mom20": -7.04,
       "atr_pct": 1.24,
       "risk": "Low",
-      "rsi": 15.1,
+      "rsi": 15.3,
       "structure": "Downtrend",
       "above_ema20": false,
       "leader": {
@@ -1412,14 +1419,39 @@
       }
     },
     {
+      "name": "Financials",
+      "etf": "XLF",
+      "price": 53.83,
+      "momentum": -3.53,
+      "mom20": -6.73,
+      "atr_pct": 1.37,
+      "risk": "Moderate",
+      "rsi": 16.0,
+      "structure": "Downtrend",
+      "above_ema20": false,
+      "leader": {
+        "symbol": "GS",
+        "dir": "bearish",
+        "grade": "A+",
+        "conv": 11,
+        "dp": "distrib"
+      },
+      "tilt": {
+        "bull": 0,
+        "bear": 10,
+        "lean": "bearish",
+        "count": 10
+      }
+    },
+    {
       "name": "Utilities",
       "etf": "XLU",
-      "price": 39.36,
-      "momentum": -5.54,
-      "mom20": -9.54,
-      "atr_pct": 1.52,
+      "price": 39.41,
+      "momentum": -4.02,
+      "mom20": -8.14,
+      "atr_pct": 1.49,
       "risk": "Moderate",
-      "rsi": 15.0,
+      "rsi": 9.9,
       "structure": "Downtrend",
       "above_ema20": false,
       "leader": null,
@@ -1431,53 +1463,53 @@
       }
     }
   ],
-  "sector_asof": "2026-09-25T07:11:05-04:00",
+  "sector_asof": "2026-09-29T06:40:58-04:00",
   "news": [],
   "futures": [
     {
       "sym": "NQ",
       "name": "Nasdaq-100",
-      "price": 30915.0,
-      "pct": 0.42
+      "price": 30612.5,
+      "pct": -0.5
     },
     {
       "sym": "ES",
       "name": "S&P 500",
-      "price": 7785.5,
-      "pct": -0.61
+      "price": 7747.75,
+      "pct": -0.25
     },
     {
       "sym": "RTY",
       "name": "Russell 2000",
-      "price": 2862.9,
-      "pct": -1.19
+      "price": 2840.3,
+      "pct": -0.58
     },
     {
       "sym": "YM",
       "name": "Dow 30",
-      "price": 51816.0,
-      "pct": -1.26
+      "price": 51828.0,
+      "pct": 0.21
     },
     {
       "sym": "GOLD",
       "name": "Gold",
-      "price": 4347.1,
-      "pct": -0.84
+      "price": 4182.2,
+      "pct": -2.69
     },
     {
       "sym": "SILVER",
       "name": "Silver",
-      "price": 65.41,
-      "pct": -0.63
+      "price": 61.2,
+      "pct": -3.55
     },
     {
       "sym": "OIL",
       "name": "WTI Crude",
-      "price": 92.94,
-      "pct": -2.97
+      "price": 92.21,
+      "pct": -2.54
     }
   ],
-  "futures_asof": "2026-09-25T07:11:05-04:00",
+  "futures_asof": "2026-09-29T06:40:58-04:00",
   "futures_session": "pre-market"
 }
 </script>
